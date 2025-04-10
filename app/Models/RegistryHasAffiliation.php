@@ -27,6 +27,11 @@ class RegistryHasAffiliation extends Model
         return $this->belongsTo(Affiliation::class, 'affiliation_id');
     }
 
+    public function registry(): BelongsTo
+    {
+        return $this->belongsTo(Registry::class, 'registry_id');
+    }
+
     public function modelState(): MorphOne
     {
         return $this->morphOne(ModelState::class, 'stateable');

@@ -25,6 +25,7 @@ class TriggerEmail
         $unclaimedUserId = isset($input['unclaimed_user_id']) ? $input['unclaimed_user_id'] : null;
         $to = $input['to'];
         $by = isset($input['by']) ? $input['by'] : null;
+        $for = isset($input['for']) ? $input['for'] : null;
         $identifier = $input['identifier'];
         switch (strtoupper($type)) {
             case 'AFFILIATION':
@@ -94,6 +95,7 @@ class TriggerEmail
                 break;
             case 'USER_DELEGATE':
                 $delegate = User::where('id', $to)->first();
+                $user = User::where('id', $for)->first();
                 $organisation = Organisation::where('id', $by)->first();
                 $template = EmailTemplate::where('identifier', $identifier)->first();
 
@@ -109,14 +111,15 @@ class TriggerEmail
                 ];
 
                 $replacements = [
-                    '[[organisations.organisation_name]]' => $organisation->organisation_name,
-                    '[[organisations.lead_application_organisation_name]]' => $organisation->lead_applicant_organisation_name,
-                    '[[users.first_name]]' => $delegate->first_name,
-                    '[[users.last_name]]' => $delegate->last_name,
-                    '[[users.created_at]]' => $delegate->created_at,
+                    '[[organisation_name]]' => $organisation->organisation_name,
+                    '[[delegate_first_name]]' => $delegate->first_name,
+                    '[[delegate_last_name]]' => $delegate->last_name,
+                    '[[user_first_name]]' => $user->first_name,
+                    '[[user_last_name]]' => $user->last_name,
+                    '[[user_created_at]]' => $user->created_at,
+                    '[[env(AP_NAME)]]' => env('APP_NAME'),
                     '[[env(INVITE_TIME_HOURS)]]' => env('INVITE_TIME_HOURS'),
                     '[[env(SUPPORT_EMAIL)]]' => env('SUPPORT_EMAIL'),
-                    '[[users.id]]' => $delegate->id,
                     '[[organisations.id]]' => $organisation->id,
                 ];
 
