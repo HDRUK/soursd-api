@@ -17,6 +17,7 @@ use App\Models\Affiliation;
 use App\Models\RegistryHasAffiliation;
 use App\Models\ProjectHasCustodian;
 use App\Models\OrganisationHasCustodianApproval;
+use App\Models\RegistryReadRequest;
 use App\Observers\FileObserver;
 use App\Observers\ONSFileObserver;
 use App\Observers\RegistryObserver;
@@ -34,6 +35,7 @@ use App\Observers\RegistryHasTrainingObserver;
 use App\Observers\ProjectHasCustodianObserver;
 use App\Observers\OrganisationHasCustodianApprovalObserver;
 use App\Observers\AuditModelObserver;
+use App\Observers\RegistryReadRequestObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Event;
@@ -75,6 +77,7 @@ class AppServiceProvider extends ServiceProvider
         RegistryHasAffiliation::observe(RegistryHasAffiliationObserver::class);
         ProjectHasCustodian::observe(ProjectHasCustodianObserver::class);
         OrganisationHasCustodianApproval::observe(OrganisationHasCustodianApprovalObserver::class);
+        RegistryReadRequest::observe(RegistryReadRequestObserver::class);
         // currently Training but is to be moved to RegistryHasTraining...
         // RegistryHasTraining::observe(RegistryHasTrainingObserver::class);
     }

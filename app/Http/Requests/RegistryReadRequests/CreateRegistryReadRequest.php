@@ -13,10 +13,6 @@ class CreateRegistryReadRequest extends BaseFormRequest
                 'string',
                 'required'
             ],
-            'custodian_identifier' => [
-                'string',
-                'required',
-            ],
         ];
     }
 }

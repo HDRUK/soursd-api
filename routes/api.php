@@ -278,7 +278,7 @@ Route::middleware('auth:api')->post('v1/approvals/{entity_type}', [ApprovalContr
 Route::middleware('auth:api')->get('v1/approvals/{entity_type}/{id}/custodian/{custodian_id}', [ApprovalController::class, 'getEntityHasCustodianApproval']);
 Route::middleware('auth:api')->delete('v1/approvals/{entity_type}/{id}/custodian/{custodian_id}', [ApprovalController::class, 'delete']);
 
-Route::middleware('auth:api')->post('v1/request_access', [RegistryReadRequestController::class, 'request']);
+Route::middleware(['check.custodian.access', 'verify.signed.payload'])->post('v1/request_access', [RegistryReadRequestController::class, 'request']);
 Route::middleware('auth:api')->patch('v1/request_access/{id}', [RegistryReadRequestController::class, 'acceptOrReject']);
 
 Route::middleware('auth:api')->get('v1/webhooks/receivers', [WebhookController::class, 'getAllReceivers']);
