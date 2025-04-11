@@ -14,6 +14,7 @@ use App\Models\Organisation;
 use App\Models\CustodianHasRule;
 use App\Models\Rules;
 use App\Models\Project;
+use App\Models\Registry;
 use App\Traits\CommonFunctions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -890,6 +891,63 @@ class CustodianController extends Controller
             'message' => 'success',
             'data' => $custodian->rules
         ]);
+    }
+
+    /**
+     * @OA\Get(
+     *      path="/api/v1/custodians/{custodianId}/organisations/{organisationId}/users",
+     *      summary="Get rules for a specific custodian",
+     *      description="Fetches the list of users associated with the given custodian and organisations IDs.",
+     *      tags={"Custodians"},
+     *      @OA\Parameter(
+     *          name="id",
+     *          in="path",
+     *          required=true,
+     *          description="ID of the custodian",
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Parameter(
+     *          name="id",
+     *          in="path",
+     *          required=true,
+     *          description="ID of the organiastion",
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successfully retrieved organisation users",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="success"),
+     *              @OA\Property(property="data",
+     *                  @OA\Items(
+     *                      ref="#/components/schemas/User"
+     *                  )
+     *              )
+     *          ),
+     *      ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="Organisation users not found",
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(property="message", type="string", example="Organisation users not found")
+     *          )
+     *      )
+     * )
+     */
+    public function getOrganisationUsers(Request $request, int $custodianId, int $organisationId): JsonResponse
+    {
+        $users = User::searchViaRequest()->applySorting()->with(['registry.affiliations' => function ($query) use ($organisationId) {
+            $query->where('organisation_id', $organisationId);
+        }])->whereNotNull('registry_id')->whereHas('registry.affiliations', function ($query) use ($organisationId) {
+            $query->where('organisation_id', $organisationId);
+        })->paginate((int)$this->getSystemConfig('PER_PAGE'));
+
+        if ($users) {
+            return $this->OKResponse($users);
+        }
+
+        return $this->NotFoundResponse();
     }
 
     /**

@@ -126,6 +126,7 @@ Route::middleware(['auth:api', 'check.custodian.access'])->post('v1/custodians/p
 Route::middleware('auth:api')->get('v1/custodians/{id}/rules', [CustodianController::class, 'getRules']);
 Route::middleware('auth:api')->patch('v1/custodians/{id}/rules', [CustodianController::class, 'updateCustodianRules']);
 Route::middleware('auth:api')->get('v1/custodians/{id}/users', [CustodianController::class, 'usersWithCustodianApprovals']);
+Route::middleware('auth:api')->get('v1/custodians/{id}/organisations/{organisationId}/users', [CustodianController::class, 'getOrganisationUsers']);
 
 Route::middleware('auth:api')->get('v1/custodian_users', [CustodianUserController::class, 'index']);
 Route::middleware('auth:api')->get('v1/custodian_users/{id}', [CustodianUserController::class, 'show']);
