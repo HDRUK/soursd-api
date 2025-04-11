@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use App\Traits\SearchManager;
@@ -320,13 +321,42 @@ class Organisation extends Model
         );
     }
 
+    public function sroOfficer(): HasOne
+    {
+        return $this->hasOne(
+            User::class,
+        )->where('is_sro', 1);
+    }
+
+
+    public function scopeGetOrganisationsProjects($query)
+    {
+        $results = array();
+        $organisations = $query->get();
+
+        foreach ($organisations as $organisation) {
+            if (count($organisation->projects)) {
+                foreach ($organisation->projects as $project) {
+                    unset($organisation->projects);
+
+                    array_push($results, array_merge($organisation->toArray(), [
+                        'project' => $project
+                    ]));
+                }
+            } else {
+                array_push($results, $organisation->toArray());
+            }
+        }
+
+        return $results;
+    }
+
     public function latestEvidence(): BelongsToMany
     {
         return $this->belongsToMany(File::class, 'organisation_has_files')
             ->where('status', File::FILE_STATUS_PROCESSED)
             ->whereRaw('updated_at = (SELECT MAX(updated_at) FROM files f WHERE f.type = files.type)');
     }
-
 
     public function ceExpiryEvidence(): BelongsTo
     {
@@ -351,6 +381,14 @@ class Organisation extends Model
     public function affiliations(): HasMany
     {
         return $this->hasMany(Affiliation::class, 'organisation_id');
+    }
+
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Project::class,
+            'project_has_organisations',
+        );
     }
 
     public function registries(): HasManyThrough

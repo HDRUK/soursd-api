@@ -19,11 +19,13 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Traits\Responses;
+use App\Traits\SearchManagerCollection;
 
 class CustodianController extends Controller
 {
     use CommonFunctions;
     use Responses;
+    use SearchManagerCollection;
 
     /**
      * @OA\Get(
@@ -715,6 +717,69 @@ class CustodianController extends Controller
         }
 
         return $this->NotFoundResponse();
+    }
+
+    /**
+     * @OA\Get(
+     *      path="/api/v1/custodian/{custodianId}/organisations",
+     *      summary="Return all custodian organisations with projects",
+     *      description="Fetch a list of custodians organisations with projects, along with pagination details.",
+     *      tags={"custodian"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Parameter(
+     *          name="custodianId",
+     *          in="path",
+     *          description="The ID of the custodian whose organisations are to be retrieved",
+     *          required=true,
+     *          example="1",
+     *          @OA\Schema(
+     *              type="integer"
+     *          ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Success",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="success"),
+     *              @OA\Property(property="data", type="object",
+     *                  @OA\Property(property="current_page", type="integer", example=1),
+     *                  @OA\Property(property="per_page", type="integer", example=25),
+     *                  @OA\Property(property="total", type="integer", example=24),
+     *                  @OA\Property(property="data", type="array",
+     *                      @OA\Items(
+     *                          ref="#/components/schemas/Organisation",
+     *                          @OA\Property(property="project", type="array",
+     *                              @OA\Items(
+     *                                  ref="#/components/schemas/Project",
+     *                              )
+     *                          )
+     *                      )
+     *                  ),
+     *                  @OA\Property(property="first_page_url", type="string", example="http://localhost:8100/api/v1/custodians/1/organisations?page=1"),
+     *                  @OA\Property(property="last_page_url", type="string", example="http://localhost:8100/api/v1/custodians/1/organisations?page=1"),
+     *                  @OA\Property(property="next_page_url", type="string", example=null),
+     *                  @OA\Property(property="prev_page_url", type="string", example=null)
+     *              )
+     *          )
+     *      )
+     * )
+     */
+    public function getOrganisations(Request $request, int $custodianId): JsonResponse
+    {
+        $results = Organisation::searchViaRequest()
+            ->applySorting()
+            ->with(['sroOfficer', 'projects' => function ($query) {
+                $query->filterByState()
+                    ->with("modelState.state");
+            }])
+            ->whereHas('projects.custodians', function ($query) use ($custodianId) {
+                $query->where('custodians.id', $custodianId);
+            })
+            ->whereHas('projects', function ($query) {
+                $query->filterByState();
+            })->getOrganisationsProjects();
+
+        return $this->OKResponse($this->paginateCollection($results));
     }
 
     /**
