@@ -11,9 +11,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RegistryReadRequests\CreateRegistryReadRequest as CRRR;
 use App\Http\Requests\RegistryReadRequests\EditRegistryReadRequest as ERRR;
 use Illuminate\Http\JsonResponse;
+use App\Http\Traits\Responses;
 
 class RegistryReadRequestController extends Controller
 {
+    use Responses;
     /**
      * @OA\Post(
      *      path="/api/v1/request_access",
@@ -66,26 +68,15 @@ class RegistryReadRequestController extends Controller
      */
     public function request(CRRR $request): JsonResponse
     {
-        $custodian = Custodian::where('calculated_hash', $request->only(['custodian_identifier']))->first();
-        if (!$custodian) {
-            return response()->json([
-                'message' => 'custodian_identifier not known',
-                'data' => null,
-            ], 404);
-        }
-
-        // At this point, the calculated hash, matches that built by us
-        // so we can safely assume that the token hasn't been tampered
-        // with.
+        $custodian = Custodian::where('client_id', $request->header('x-client-id'))->first();
         $registry = Registry::where('digi_ident', $request->only(['digital_identifier']))->first();
+
         if (!$registry) {
-            return response()->json([
-                'message' => 'digital_identifier not known',
-                'data' => null,
-            ], 404);
+            $this->NotFoundResponse();
         }
 
-        $rrr = RegistryReadRequest::create([
+        $rrr = RegistryReadRequest::updateOrCreate([
+            'updated_at' => Carbon::now(),
             'custodian_id' => $custodian->id,
             'registry_id' => $registry->id,
             'status' => RegistryReadRequest::READ_REQUEST_STATUS_OPEN,
@@ -152,17 +143,9 @@ class RegistryReadRequestController extends Controller
     public function acceptOrReject(ERRR $request, int $id): JsonResponse
     {
         $input = $request->only([
+            'id',
             'status',
-            'user_id',
         ]);
-
-        $user = User::where('id', $input['user_id'])->first();
-        if ($user->user_group !== User::GROUP_USERS) {
-            return response()->json([
-                'message' => 'you don\'t have access to this record',
-                'data' => null,
-            ], 403);
-        }
 
         $rrr = RegistryReadRequest::where('id', $id)->first();
         if (!$rrr) {
@@ -170,6 +153,14 @@ class RegistryReadRequestController extends Controller
                 'message' => 'not found',
                 'data' => null,
             ], 404);
+        }
+
+        $user = User::where('registry_id', $rrr->registry_id)->first();
+        if ($user->user_group !== User::GROUP_USERS) {
+            return response()->json([
+                'message' => 'you don\'t have access to this record',
+                'data' => null,
+            ], 403);
         }
 
         if ($user->registry_id !== $rrr->registry_id) {

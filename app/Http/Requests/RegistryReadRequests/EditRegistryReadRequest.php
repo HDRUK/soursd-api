@@ -14,11 +14,6 @@ class EditRegistryReadRequest extends BaseFormRequest
                 'required',
                 'in:1,2',
             ],
-            'user_id' => [
-                'integer',
-                'required',
-                'exists:users,id',
-            ],
         ];
     }
 }
