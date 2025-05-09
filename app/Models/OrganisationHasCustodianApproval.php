@@ -22,6 +22,12 @@ class OrganisationHasCustodianApproval extends Model
     protected $fillable = [
         'organisation_id',
         'custodian_id',
+        'approved',
+        'comment',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
     ];
 
     public const ORGANISATION_ALIGNED_SDE_NETWORK = 'organisation_aligned_sde_network';

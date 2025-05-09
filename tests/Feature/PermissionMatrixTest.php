@@ -929,6 +929,97 @@ class PermissionMatrixTest extends TestCase
         $this->runTests($expectedMatrix);
     }
 
+    public function test_custodian_approval_matrix()
+    {
+
+        $expectedMatrix = [
+            [
+                'method' => 'get',
+                'route' => '/custodian_approvals/1/projects/2/registry/1',
+                'permissions' => [
+                    'admin' => 200,
+                    'custodian1' => 200,
+                    'custodian2' => 200,
+                    'organisation1' => 200,
+                    'organisation2' => 200,
+                    'delegate' => 200,
+                    'researcher1' => 403,
+                    'researcher2' => 403,
+                ],
+            ],
+            [
+                'method' => 'post',
+                'payload' => [
+                    'approved' => 1,
+                    'comment' => 'approved'
+                ],
+                'route' => '/custodian_approvals/1/projects/2/registry/1',
+                'permissions' => [
+                    'admin' => 201,
+                    'custodian1' => 201,
+                    'custodian2' => 403,
+                    'organisation1' => 403,
+                    'organisation2' => 403,
+                    'delegate' => 403,
+                    'researcher1' => 403,
+                    'researcher2' => 403,
+                ],
+            ],
+            [
+                'method' => 'get',
+                'route' => '/custodian_approvals/1/organisations/1',
+                'permissions' => [
+                    'admin' => 200,
+                    'custodian1' => 200,
+                    'custodian2' => 200,
+                    'organisation1' => 200,
+                    'organisation2' => 200,
+                    'delegate' => 200,
+                    'researcher1' => 403,
+                    'researcher2' => 403,
+                ],
+            ],
+            [
+                'method' => 'post',
+                'payload' => [
+                    'approved' => 1,
+                    'comment' => 'approved'
+                ],
+                'route' => '/custodian_approvals/1/organisations/1',
+                'permissions' => [
+                    'admin' => 201,
+                    'custodian1' => 201,
+                    'custodian2' => 403,
+                    'organisation1' => 403,
+                    'organisation2' => 403,
+                    'delegate' => 403,
+                    'researcher1' => 403,
+                    'researcher2' => 403,
+                ],
+            ],
+            [
+                'method' => 'post',
+                'payload' => [
+                    'approved' => 1,
+                    'comment' => 'approved'
+                ],
+                'route' => '/custodian_approvals/2/organisations/1',
+                'permissions' => [
+                    'admin' => 201,
+                    'custodian1' => 403,
+                    'custodian2' => 201,
+                    'organisation1' => 403,
+                    'organisation2' => 403,
+                    'delegate' => 403,
+                    'researcher1' => 403,
+                    'researcher2' => 403,
+                ],
+            ],
+        ];
+
+        $this->runTests($expectedMatrix);
+    }
+
     private function runTests(array $expectedMatrix)
     {
         $matrix = [];

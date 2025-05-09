@@ -111,11 +111,9 @@ class ValidationLogController extends Controller
                 ->get();
 
             return $this->OKResponse($logs);
-
         } catch (Exception $e) {
             return $this->ErrorResponse();
         }
-
     }
 
     /**
@@ -194,11 +192,9 @@ class ValidationLogController extends Controller
                 ->get();
 
             return $this->OKResponse($logs);
-
         } catch (Exception $e) {
             return $this->ErrorResponse($e->getMessage());
         }
-
     }
 
     /**
@@ -253,7 +249,6 @@ class ValidationLogController extends Controller
                 ->update(['enabled' => $validated['enabled']]);
 
             return $this->OKResponse($updated);
-
         } catch (Exception $e) {
             return $this->ErrorResponse();
         }
@@ -303,34 +298,34 @@ class ValidationLogController extends Controller
     }
 
     /**
-    * @OA\Get(
-    *     path="/api/v1/validation_logs/{id}/comments",
-    *     summary="Get all comments for a Validation Log",
-    *     description="Retrieve all comments associated with a specific validation log entry.",
-    *     tags={"Validation Log Comments"},
-    *     security={{"bearerAuth":{}}},
-    *
-    *     @OA\Parameter(
-    *         name="id",
-    *         in="path",
-    *         required=true,
-    *         description="The ID of the validation log",
-    *         @OA\Schema(type="integer")
-    *     ),
-    *
-    *     @OA\Response(
-    *         response=200,
-    *         description="Validation log with comments",
-    *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/ValidationLog"))
-    *     ),
-    *
-    *     @OA\Response(
-    *         response=404,
-    *         description="Validation log not found",
-    *         @OA\JsonContent(@OA\Property(property="message", type="string", example="Validation log not found"))
-    *     )
-    * )
-    */
+     * @OA\Get(
+     *     path="/api/v1/validation_logs/{id}/comments",
+     *     summary="Get all comments for a Validation Log",
+     *     description="Retrieve all comments associated with a specific validation log entry.",
+     *     tags={"Validation Log Comments"},
+     *     security={{"bearerAuth":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="The ID of the validation log",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Validation log with comments",
+     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/ValidationLog"))
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Validation log not found",
+     *         @OA\JsonContent(@OA\Property(property="message", type="string", example="Validation log not found"))
+     *     )
+     * )
+     */
     public function comments($validationLogId): JsonResponse
     {
         $validationLog = ValidationLog::find($validationLogId);
@@ -420,9 +415,5 @@ class ValidationLogController extends Controller
         $log->refresh();
 
         return $this->OKResponse($log);
-
     }
-
-
-
 }
