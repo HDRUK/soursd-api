@@ -83,6 +83,21 @@ class RegistryReadRequestController extends Controller
             'approved_at' => null,
         ]);
 
+        // TODO: remove this when the system is in production
+        if (env('APP_ENV') === 'local' || env('APP_ENV') === 'dev') {
+            if ($request->has('debug_approve_access') && $request->input('debug_approve_access') === 'true') {
+                $rrr->update([
+                    'status' => RegistryReadRequest::READ_REQUEST_STATUS_APPROVED,
+                    'approved_at' => Carbon::now(),
+                ]);
+            } elseif ($request->has('debug_approve_access') && $request->input('debug_approve_access') === 'false') {
+                $rrr->update([
+                    'status' => RegistryReadRequest::READ_REQUEST_STATUS_REJECTED,
+                    'rejected_at' => Carbon::now(),
+                ]);
+            }
+        }
+
         if ($rrr) {
             return response()->json([
                 'message' => 'success',

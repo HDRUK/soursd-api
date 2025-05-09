@@ -14,8 +14,11 @@ use App\Models\Registry;
 use App\Models\Training;
 use App\Models\User;
 use App\Models\RegistryHasTraining;
+use App\Models\RegistryReadRequest;
+use App\Models\Custodian;
 use DB;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 
 class QueryController extends Controller
@@ -130,6 +133,30 @@ class QueryController extends Controller
     public function query(Request $request): JsonResponse
     {
         $input = $request->all();
+
+        $custodianKey = $request->header('x-client-id', null);
+        if (!$custodianKey) {
+            return response()->json([
+                'message' => 'you must provide your Custodian key',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $custodian = Custodian::where('client_id', $custodianKey)->first();
+        if (! $custodian) {
+            return response()->json([
+                'message' => 'no known custodian matches the credentials provided',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $rrr = RegistryReadRequest::where('custodian_id', $custodian->id)
+            ->where('registry_id', Registry::where('digi_ident', $input['ident'])->first()->id)
+            ->where('status', RegistryReadRequest::READ_REQUEST_STATUS_APPROVED)
+            ->first();
+        if (!$rrr) {
+            return response()->json([
+                'message' => 'no user approved read request found',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
 
         // We could do the following with eloquent, but as it's quite a large hit,
         // it's far more performant to just pull the records manually and form
