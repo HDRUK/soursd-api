@@ -18,6 +18,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Models\DebugLog;
 
 class AuthController extends Controller
 {
@@ -32,62 +33,76 @@ class AuthController extends Controller
 
     public function registerKeycloakUser(Request $request): JsonResponse
     {
-        $token = explode('Bearer ', $request->headers->get('Authorization'));
+        try {
+            $tokenParts = explode('Bearer ', $request->headers->get('Authorization'));
+            $token = trim($tokenParts[1] ?? '');
 
-        $response = Keycloak::getUserInfo($request->headers->get('Authorization'));
-        $payload = $response->json();
+            $response = Keycloak::getUserInfo($token);
+            $payload = $response->json();
 
-        $user = RMC::createNewUser($payload, $request);
+            DebugLog::create([
+                'class' => AuthController::class,
+                'log' => json_encode(array_keys($payload))
+            ]);
 
-        if ($user) {
-            if (isset($user['unclaimed_user_id'])) {
-                $unclaimedUser = User::where('id', $user['unclaimed_user_id'])->first();
-                $pendingInvite = PendingInvite::where('user_id', $user['unclaimed_user_id'])->first();
-                if ($pendingInvite) {
+            $user = RMC::createNewUser($payload, $request);
 
-                    $registryId = $unclaimedUser->registry_id;
-                    $organisationId = $pendingInvite->organisation_id;
+            if ($user) {
+                if (isset($user['unclaimed_user_id'])) {
+                    $unclaimedUser = User::where('id', $user['unclaimed_user_id'])->first();
+                    $pendingInvite = PendingInvite::where('user_id', $user['unclaimed_user_id'])->first();
+                    if ($pendingInvite) {
 
-                    $aff = Affiliation::create([
-                        'organisation_id' => $organisationId,
-                        'member_id' => '',
-                        'relationship' => null,
-                        'from' => null,
-                        'to' => null,
-                        'department' => null,
-                        'role' => null,
-                        'email' => $unclaimedUser->email,
-                        'ror' => null,
-                        'registry_id' => $registryId,
-                    ]);
+                        $registryId = $unclaimedUser->registry_id;
+                        $organisationId = $pendingInvite->organisation_id;
 
-                    RegistryHasAffiliation::create([
-                        'affiliation_id' => $aff->id,
-                        'registry_id' => $registryId,
-                    ]);
+                        $aff = Affiliation::create([
+                            'organisation_id' => $organisationId,
+                            'member_id' => '',
+                            'relationship' => null,
+                            'from' => null,
+                            'to' => null,
+                            'department' => null,
+                            'role' => null,
+                            'email' => $unclaimedUser->email,
+                            'ror' => null,
+                            'registry_id' => $registryId,
+                        ]);
 
-                    $pendingInvite->invite_accepted_at = Carbon::now();
-                    $pendingInvite->status = config('speedi.invite_status.COMPLETE');
-                    $pendingInvite->save();
+                        RegistryHasAffiliation::create([
+                            'affiliation_id' => $aff->id,
+                            'registry_id' => $registryId,
+                        ]);
+
+                        $pendingInvite->invite_accepted_at = Carbon::now();
+                        $pendingInvite->status = config('speedi.invite_status.COMPLETE');
+                        $pendingInvite->save();
+                    }
+
+
+                    return response()->json([
+                        'message' => 'success',
+                        'data' => $unclaimedUser,
+                    ], 201);
                 }
-
 
                 return response()->json([
                     'message' => 'success',
-                    'data' => $unclaimedUser,
+                    'data' => null,
                 ], 201);
             }
 
             return response()->json([
-                'message' => 'success',
+                'message' => 'failed',
                 'data' => null,
-            ], 201);
+            ], 400);
+        } catch (Exception $e) {
+            DebugLog::create([
+                'class' => AuthController::class,
+                'log' => $e->getMessage()
+            ]);
+            throw new Exception($e);
         }
-
-        return response()->json([
-            'message' => 'failed',
-            'data' => null,
-        ], 400);
     }
 
     public function me(Request $request): JsonResponse

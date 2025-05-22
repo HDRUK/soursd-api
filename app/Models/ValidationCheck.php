@@ -16,7 +16,7 @@ use App\Traits\SearchManager;
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="Check format"),
  *     @OA\Property(property="description", type="string", example="Ensures proper formatting of input"),
- *     @OA\Property(property="applies_to", type="string", example="user"), 
+ *     @OA\Property(property="applies_to", type="string", example="user"),
  *     @OA\Property(property="enabled", type="boolean", example=true),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-01T00:00:00Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-01-01T00:00:00Z")

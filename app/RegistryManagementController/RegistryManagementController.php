@@ -226,39 +226,39 @@ class RegistryManagementController
                 'digi_ident' => RegistryManagementController::generateDigitalIdentifierForRegistry(),
                 'verified' => 0,
               ]);
-      
-              $userData = [
-                  'first_name' => $user['firstname'],
-                  'last_name' => $user['lastname'],
-                  'email' => $user['email'],
-                  'unclaimed' => 1,
-                  'feed_source' => 'ORG',
-                  'registry_id' => $registry->id,
-                  'orc_id' => '',
-                  'user_group' => $user['user_group'] ?? '',
-                  'organisation_id' => $user['organisation_id'] ?? null,
-                  'custodian_id' => $user['custodian_id'] ?? null,
-                  'custodian_user_id' => $user['custodian_user_id'] ?? null,
-                  'is_delegate' => $user['is_delegate'] ?? 0,
-                  'role' => $user['role'] ?? null,
-              ];
-      
-              if ($strictCreate) {
-                  return User::create($userData);
-              } else {
-                  $existingUser = User::where('email', $user['email'])->first();
-      
-                  if ($existingUser) {
-                      if ($existingUser->unclaimed) {
-                          $existingUser->update($userData);
-                          unset($userData);
-                      }
-                      return $existingUser;
-                  }
-                  $user = User::create($userData);
-      
-                  return $user;
-              }
+
+            $userData = [
+                'first_name' => $user['firstname'],
+                'last_name' => $user['lastname'],
+                'email' => $user['email'],
+                'unclaimed' => 1,
+                'feed_source' => 'ORG',
+                'registry_id' => $registry->id,
+                'orc_id' => '',
+                'user_group' => $user['user_group'] ?? '',
+                'organisation_id' => $user['organisation_id'] ?? null,
+                'custodian_id' => $user['custodian_id'] ?? null,
+                'custodian_user_id' => $user['custodian_user_id'] ?? null,
+                'is_delegate' => $user['is_delegate'] ?? 0,
+                'role' => $user['role'] ?? null,
+            ];
+
+            if ($strictCreate) {
+                return User::create($userData);
+            } else {
+                $existingUser = User::where('email', $user['email'])->first();
+
+                if ($existingUser) {
+                    if ($existingUser->unclaimed) {
+                        $existingUser->update($userData);
+                        unset($userData);
+                    }
+                    return $existingUser;
+                }
+                $user = User::create($userData);
+
+                return $user;
+            }
         } catch (Exception $e) {
             DebugLog::create([
                 'class' => RegistryManagementController::class,
