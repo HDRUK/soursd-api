@@ -1,27 +1,27 @@
 <?php
 
-use Laravel\Octane\Contracts\OperationTerminated;
-use Laravel\Octane\Events\RequestHandled;
-use Laravel\Octane\Events\RequestReceived;
-use Laravel\Octane\Events\RequestTerminated;
+use Laravel\Octane\Octane;
 use Laravel\Octane\Events\TaskReceived;
-use Laravel\Octane\Events\TaskTerminated;
 use Laravel\Octane\Events\TickReceived;
+use Laravel\Octane\Listeners\FlushOnce;
+use Laravel\Octane\Events\RequestHandled;
+use Laravel\Octane\Events\TaskTerminated;
 use Laravel\Octane\Events\TickTerminated;
-use Laravel\Octane\Events\WorkerErrorOccurred;
 use Laravel\Octane\Events\WorkerStarting;
 use Laravel\Octane\Events\WorkerStopping;
-use Laravel\Octane\Listeners\CloseMonologHandlers;
+use Laravel\Octane\Events\RequestReceived;
+use Laravel\Octane\Events\RequestTerminated;
 use Laravel\Octane\Listeners\CollectGarbage;
+use Laravel\Octane\Listeners\ReportException;
+use Laravel\Octane\Events\WorkerErrorOccurred;
+use Laravel\Octane\Listeners\FlushUploadedFiles;
+use Laravel\Octane\Contracts\OperationTerminated;
+use Laravel\Octane\Listeners\CloseMonologHandlers;
+use Laravel\Octane\Listeners\StopWorkerIfNecessary;
 use Laravel\Octane\Listeners\DisconnectFromDatabases;
 use Laravel\Octane\Listeners\EnsureUploadedFilesAreValid;
 use Laravel\Octane\Listeners\EnsureUploadedFilesCanBeMoved;
-use Laravel\Octane\Listeners\FlushOnce;
 use Laravel\Octane\Listeners\FlushTemporaryContainerInstances;
-use Laravel\Octane\Listeners\FlushUploadedFiles;
-use Laravel\Octane\Listeners\ReportException;
-use Laravel\Octane\Listeners\StopWorkerIfNecessary;
-use Laravel\Octane\Octane;
 
 return [
 
@@ -220,5 +220,26 @@ return [
     */
 
     'max_execution_time' => 30,
+
+    'garbage_collect_threshold' => 10, // Run GC aggressively
+    'max_requests' => 50,
+
+    'features' => [
+        // Disable unused features if possible
+        'routes',
+        'views',
+        'sessions',
+        'tables',
+    ],
+
+    'frankenphp' => [
+        'host' => env('OCTANE_HOST', '0.0.0.0'),
+        'port' => env('OCTANE_PORT', 8100),
+        'workers' => env('OCTANE_WORKERS', 2),
+        'task_workers' => env('OCTANE_TASK_WORKERS', 2),
+        'max_requests' => env('OCTANE_MAX_REQUESTS', 1000),
+        'worker_timeout' => 60,
+        'https' => env('OCTANE_HTTPS', false),
+    ],
 
 ];

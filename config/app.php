@@ -203,7 +203,7 @@ return [
         'OrcID' => App\OrcID\OrcIDFacade::class,
         'TriggerEmail' => App\TriggerEmail\TriggerEmailFacade::class,
         'RegistryManagementController' => App\RegistryManagementController\RegistryManagementController::class,
-        'RulesEngineManagementController' => App\RulesEngineManagementController\RulesEngineManagementController::class,
+        'RulesEngineManagementController' => App\RulesEngineManagementController\RulesEngineManagementControllerFacade::class,
         'Gateway' => App\Gateway\GatewayFacade::class,
     ])->toArray(),
 

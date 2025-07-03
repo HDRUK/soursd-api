@@ -1,0 +1,47 @@
+{
+    "logging": {
+        "logs": {
+                "default": {
+                    "level": "INFO",
+                    "writer": {
+                    "output": "stdout"
+                }
+            },
+            "error": {
+                "level": "ERROR",
+                "writer": {
+                    "output": "stderr"
+                }
+            }
+        }
+    },
+    "frankenphp": {
+        "worker": {
+            "fileName": "public/index.php",
+            "num": 2,
+            "env": {
+                "OCTANE_MAX_REQUESTS": "1000"
+            }
+        }
+    },
+    "apps": {
+        "http": {
+            "servers": {
+                "srv0": {
+                    "listen": [":8100"],
+                    "routes": [
+                        {
+                            "match": [{"path": ["/*"]}],
+                            "handle": [
+                                {
+                                    "handler": "php",
+                                    "root": "/var/www/html/public"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

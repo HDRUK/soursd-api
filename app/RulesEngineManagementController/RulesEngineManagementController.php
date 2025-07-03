@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class RulesEngineManagementController
 {
-    public static function getCustodianKeyFromHeaders(): string
+    public function getCustodianKeyFromHeaders(): string
     {
         $obj = json_decode(Auth::token(), true);
 
@@ -26,9 +26,9 @@ class RulesEngineManagementController
         return '';
     }
 
-    public static function determineUserCustodian(): mixed
+    public function determineUserCustodian(): mixed
     {
-        $key = RulesEngineManagementController::getCustodianKeyFromHeaders();
+        $key = $this->getCustodianKeyFromHeaders();
         $user = User::where('keycloak_id', $key)->first();
 
         if (!$user || $user->user_group !== 'CUSTODIANS') {
@@ -46,9 +46,9 @@ class RulesEngineManagementController
         return $custodianId;
     }
 
-    public static function loadCustodianRules(Request $request): ?Collection
+    public function loadCustodianRules(Request $request): ?Collection
     {
-        $custodianId = RulesEngineManagementController::determineUserCustodian();
+        $custodianId = $this->determineUserCustodian();
         if (!$custodianId) {
             return null;
         }

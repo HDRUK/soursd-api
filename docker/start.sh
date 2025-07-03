@@ -4,30 +4,37 @@ if [ -e /var/www/.env ]; then
     source /var/www/.env
 fi
 
-base_command="php artisan octane:frankenphp --max-requests=250 --host=0.0.0.0 --port=8100"
-# base_command="./rr serve --config=.rr.yaml"
-# base_command="php artisan serve --host=0.0.0.0 --port=8100"
+echo "===> Starting Laravel setup..."
 
-if [ $APP_ENV = 'local' ] || [ $APP_ENV = 'dev' ]; then
-    echo 'running in dev mode - with watch'
-    # base_command="$base_command --watch"
+if [ "$APP_ENV" = "local" ] || [ "$APP_ENV" = "dev" ]; then
+    echo "Running in development mode with watch enabled"
 
-    if [ $REBUILD_DB = 1 ]; then
-        # Completely clear down the data in local/dev envs
+    if [ "$REBUILD_DB" = 1 ]; then
+        echo "Rebuilding DB..."
         php artisan migrate:fresh
         php artisan db:seed --class=BaseDemoSeeder
     else
         php artisan migrate
     fi
 else
-    # Only forward-facing migrations anywhere else
+    echo "Running in production mode"
+
     php artisan migrate
-    # call the email template seeder to updateOrCreate without truncating first
     DISABLE_TRUNCATE=true php artisan db:seed --class=EmailTemplatesSeeder
     php artisan validation:generate-logs
-
-    echo "running in prod mode"
 fi
 
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan event:cache
+
 php artisan horizon &
-$base_command
+
+# php artisan octane:frankenphp \
+#   --host=0.0.0.0 \
+#   --port=8100 \
+#   --max-requests=250 \
+#   --workers=auto
+
+php artisan octane:start --server=frankenphp --host=0.0.0.0 --port=8100 --workers=auto --max-requests=50

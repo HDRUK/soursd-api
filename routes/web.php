@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+// stop all all other routes
+Route::any('{path}', function () {
+    $response = [
+        'message' => 'Resource not found',
+    ];
+
+    return response()->json($response)
+        ->setStatusCode(404);
 });

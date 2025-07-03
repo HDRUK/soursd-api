@@ -2,45 +2,50 @@
 
 namespace App\Providers;
 
+use DB;
 use App\Models\File;
+use App\Models\User;
 use App\Models\ONSFile;
 use App\Models\Registry;
 use App\Models\Custodian;
-use App\Models\CustodianUser;
-use App\Models\CustodianHasRule;
-use App\Models\ProjectHasUser;
-use App\Models\User;
-use App\Models\UserHasDepartments;
-use App\Models\Organisation;
-use App\Models\OrganisationHasSubsidiary;
 use App\Models\Affiliation;
-use App\Models\ProjectHasOrganisation;
-use App\Models\ProjectHasCustodian;
-use App\Models\CustodianHasProjectOrganisation;
-use App\Models\RegistryReadRequest;
-use App\Models\CustodianHasValidationCheck;
+use App\Models\Organisation;
+use App\Models\CustodianUser;
+use App\Models\ProjectHasUser;
 use App\Observers\FileObserver;
-use App\Observers\ONSFileObserver;
-use App\Observers\RegistryObserver;
-use App\Observers\CustodianObserver;
-use App\Observers\CustodianHasRuleObserver;
-use App\Observers\ProjectHasUserObserver;
-use App\Observers\ProjectHasOrganisationObserver;
 use App\Observers\UserObserver;
-use App\Observers\UserHasDepartmentsObserver;
-use App\Observers\OrganisationObserver;
-use App\Observers\OrganisationHasSubsidiaryObserver;
-use App\Observers\CustodianUserObserver;
-use App\Observers\AffiliationObserver;
-use App\Observers\ProjectHasCustodianObserver;
+use App\Models\CustodianHasRule;
+use App\Models\UserHasDepartments;
+use App\Observers\ONSFileObserver;
+use Laravel\Octane\Facades\Octane;
+use App\Models\ProjectHasCustodian;
+use App\Models\RegistryReadRequest;
+use App\Observers\RegistryObserver;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
+use App\Observers\CustodianObserver;
 use App\Observers\AuditModelObserver;
+use Illuminate\Support\Facades\Event;
+use App\Models\ProjectHasOrganisation;
+use App\Observers\AffiliationObserver;
+use App\Observers\OrganisationObserver;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\ServiceProvider;
+use App\Observers\CustodianUserObserver;
+use App\Models\OrganisationHasSubsidiary;
+use App\Observers\ProjectHasUserObserver;
+use Laravel\Octane\OctaneServiceProvider;
+use App\Models\CustodianHasValidationCheck;
+use App\Observers\CustodianHasRuleObserver;
+use App\Observers\UserHasDepartmentsObserver;
+use App\Observers\ProjectHasCustodianObserver;
 use App\Observers\RegistryReadRequestObserver;
+use App\Models\CustodianHasProjectOrganisation;
+use App\Observers\ProjectHasOrganisationObserver;
+use App\Observers\OrganisationHasSubsidiaryObserver;
+use Illuminate\Foundation\Http\Events\RequestHandled;
 use App\Observers\CustodianHasValidationCheckObserver;
 use App\Observers\CustodianHasProjectOrganisationObserver;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Database\Eloquent\Model;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -55,6 +60,32 @@ class AppServiceProvider extends ServiceProvider
             if ($model instanceof Model) {
                 App::make(AuditModelObserver::class)->handle($eventName, $model);
             }
+        });
+
+        // if (app()->providerIsLoaded(OctaneServiceProvider::class)) {
+        //     Octane::tick('gc', function () {
+        //         // Run garbage collection after every request
+        //         gc_collect_cycles();
+
+        //         // Optional: Log GC trigger
+        //         Log::info('Octane GC triggered', [
+        //             'memory_usage' => memory_get_usage(true),
+        //             'peak_memory'  => memory_get_peak_usage(true)
+        //         ]);
+
+        //         // Clean up persistent DB connections
+        //         DB::disconnect();
+        //     })->seconds(5);
+        // }
+
+        Event::listen(RequestHandled::class, function () {
+            // Safe to use Laravel services here
+            gc_collect_cycles();
+
+            Log::info('Garbage collection after request', [
+                'memory_usage' => memory_get_usage(true),
+                'peak_memory' => memory_get_peak_usage(true),
+            ]);
         });
     }
     /**
