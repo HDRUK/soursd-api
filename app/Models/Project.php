@@ -123,6 +123,31 @@ class Project extends Model
     use StateWorkflow;
     use FilterManager;
 
+    protected array $transitions = [
+        State::STATE_PROJECT_PENDING => [
+            State::STATE_PROJECT_PENDING,
+            State::STATE_PROJECT_APPROVED,
+        ],
+
+        State::STATE_PROJECT_APPROVED => [
+            State::STATE_PROJECT_APPROVED,
+            State::STATE_PROJECT_DECLINED_APPROVAL,
+            State::STATE_PROJECT_IN_PROGRESS,
+        ],
+
+        State::STATE_PROJECT_IN_PROGRESS => [
+            State::STATE_PROJECT_IN_PROGRESS,
+            State::STATE_PROJECT_COMPLETED,
+        ],
+
+        State::STATE_PROJECT_DECLINED_APPROVAL => [
+            State::STATE_PROJECT_APPROVED,
+        ],
+
+        State::STATE_PROJECT_COMPLETED => [
+        ],
+    ];
+
     protected $table = 'projects';
 
     public $timestamps = true;
@@ -194,9 +219,8 @@ class Project extends Model
         );
     }
 
-
-    public function modelState(): MorphOne
+    public function getTransitions(): array
     {
-        return $this->morphOne(ModelState::class, 'stateable');
+        return $this->transitions;
     }
 }

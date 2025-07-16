@@ -311,11 +311,6 @@ class User extends Authenticatable
         );
     }
 
-    public function modelState(): MorphOne
-    {
-        return $this->morphOne(ModelState::class, 'stateable');
-    }
-
     public static function searchByEmail(string $email): \stdClass|null
     {
         $results = DB::select(

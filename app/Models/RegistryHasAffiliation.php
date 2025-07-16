@@ -82,13 +82,13 @@ class RegistryHasAffiliation extends Model
         return $this->belongsTo(Registry::class, 'registry_id');
     }
 
-    /**
-     * Get the model state associated with this registry-affiliation relationship.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne<\App\Models\ModelState>
-     */
-    public function modelState(): MorphOne
-    {
-        return $this->morphOne(ModelState::class, 'stateable');
-    }
+    // /**
+    //  * Get the model state associated with this registry-affiliation relationship.
+    //  *
+    //  * @return \Illuminate\Database\Eloquent\Relations\MorphOne<\App\Models\ModelState>
+    //  */
+    // public function modelState(): MorphOne
+    // {
+    //     return $this->morphOne(ModelState::class, 'stateable');
+    // }
 }

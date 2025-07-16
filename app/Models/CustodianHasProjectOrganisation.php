@@ -66,22 +66,32 @@ class CustodianHasProjectOrganisation extends Model
         ],
         State::STATE_VALIDATION_IN_PROGRESS => [
             State::STATE_VALIDATION_COMPLETE,
-            State::STATE_MORE_ORG_INFO_REQ,
-            State::STATE_ESCALATE_VALIDATION,
+            State::STATE_MORE_ORG_INFO_REQ_ESCALATION_MANAGER,
+            State::STATE_MORE_ORG_INFO_REQ_ESCALATION_COMMITTEE,
+            State::STATE_ORG_VALIDATION_DECLINED,
             State::STATE_VALIDATED,
         ],
         State::STATE_VALIDATION_COMPLETE => [
-            State::STATE_ESCALATE_VALIDATION,
+            State::STATE_ORG_VALIDATION_DECLINED,
             State::STATE_VALIDATED,
         ],
-        State::STATE_MORE_ORG_INFO_REQ => [
-            State::STATE_ESCALATE_VALIDATION,
+        State::STATE_MORE_ORG_INFO_REQ_ESCALATION_MANAGER => [
+            State::STATE_MORE_ORG_INFO_REQ_ESCALATION_COMMITTEE,
+            State::STATE_ORG_VALIDATION_DECLINED,
             State::STATE_VALIDATED,
         ],
-        State::STATE_ESCALATE_VALIDATION => [
+        State::STATE_MORE_ORG_INFO_REQ_ESCALATION_COMMITTEE => [
+            State::STATE_MORE_ORG_INFO_REQ_ESCALATION_MANAGER,
+            State::STATE_ORG_VALIDATION_DECLINED,
             State::STATE_VALIDATED,
         ],
-        State::STATE_VALIDATED => [],
+        State::STATE_ORG_VALIDATION_DECLINED => [
+            State::STATE_VALIDATED,
+        ],
+        State::STATE_VALIDATED => [
+            State::STATE_ORG_LEFT_PROJECT,
+        ],
+        State::STATE_ORG_LEFT_PROJECT => [],
     ];
 
     public static function getTransitions(): array
@@ -147,10 +157,5 @@ class CustodianHasProjectOrganisation extends Model
     public function custodian(): BelongsTo
     {
         return $this->belongsTo(Custodian::class, 'custodian_id');
-    }
-
-    public function modelState(): MorphOne
-    {
-        return $this->morphOne(ModelState::class, 'stateable');
     }
 }

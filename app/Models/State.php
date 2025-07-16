@@ -88,8 +88,25 @@ class State extends Model
     public const STATE_PROJECT_APPROVED = 'project_approved';
     public const STATE_AFFILIATION_INVITED = 'affiliation_invited';
     public const STATE_AFFILIATION_PENDING = 'affiliation_pending';
-    public const STATE_AFFILIATION_APPROVED = 'affiliation_approved';
+    public const STATE_AFFILIATION_APPROVED = 'affiliation_approved'; // affiliated
     public const STATE_AFFILIATION_REJECTED = 'affiliation_rejected';
+
+    public const STATE_PROJECT_IN_PROGRESS = 'project_in_progress';
+    public const STATE_PROJECT_DECLINED_APPROVAL = 'project_declined_approval';
+
+    public const STATE_AFFILIATION_LEFT = 'affiliation_left'; // left organisation
+
+    public const STATE_MORE_USER_INFO_REQ_ESCALATION_MANAGER = 'more_user_info_req_escalation_manager'; // Escalation [to Validation Manager] 
+    public const STATE_MORE_ORG_INFO_REQ_ESCALATION_MANAGER = 'more_org_info_req_escalation_manager'; // Escalation [to Validation Manager]
+
+    public const STATE_MORE_USER_INFO_REQ_ESCALATION_COMMITTEE = 'more_user_info_req_escalation_committee'; // Escalation [to Validation Committee]';
+    public const STATE_MORE_ORG_INFO_REQ_ESCALATION_COMMITTEE = 'more_org_info_req_escalation_committee'; // Escalation [to Validation Committee]';
+
+    public const STATE_USER_VALIDATION_DECLINED = 'user_validation_declined'; // user validation declined
+    public const STATE_ORG_VALIDATION_DECLINED = 'org_validation_declined'; // org validation declined
+
+    public const STATE_USER_LEFT_PROJECT = 'user_left_project'; // user left project
+    public const STATE_ORG_LEFT_PROJECT = 'org_left_project'; // org left project
 
     public const STATES = [
         self::STATE_REGISTERED,
@@ -108,5 +125,17 @@ class State extends Model
         self::STATE_AFFILIATION_PENDING,
         self::STATE_AFFILIATION_APPROVED,
         self::STATE_AFFILIATION_REJECTED,
+
+        self::STATE_PROJECT_IN_PROGRESS,
+        self::STATE_PROJECT_DECLINED_APPROVAL,
+        self::STATE_AFFILIATION_LEFT,
+        self::STATE_MORE_USER_INFO_REQ_ESCALATION_MANAGER,
+        self::STATE_MORE_ORG_INFO_REQ_ESCALATION_MANAGER,
+        self::STATE_MORE_USER_INFO_REQ_ESCALATION_COMMITTEE,
+        self::STATE_MORE_ORG_INFO_REQ_ESCALATION_COMMITTEE,
+        self::STATE_USER_VALIDATION_DECLINED,
+        self::STATE_ORG_VALIDATION_DECLINED,
+        self::STATE_USER_LEFT_PROJECT,
+        self::STATE_ORG_LEFT_PROJECT,
     ];
 }

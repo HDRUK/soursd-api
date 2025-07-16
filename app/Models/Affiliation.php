@@ -136,14 +136,17 @@ class Affiliation extends Model
         ],
         State::STATE_AFFILIATION_PENDING => [
             State::STATE_AFFILIATION_APPROVED,
-            State::STATE_AFFILIATION_REJECTED
+            State::STATE_AFFILIATION_REJECTED,
+            State::STATE_AFFILIATION_LEFT,
         ],
         State::STATE_AFFILIATION_APPROVED => [
-            State::STATE_AFFILIATION_REJECTED
+            State::STATE_AFFILIATION_REJECTED,
+            State::STATE_AFFILIATION_LEFT,
         ],
         State::STATE_AFFILIATION_REJECTED => [
             State::STATE_AFFILIATION_APPROVED
-        ]
+        ],
+        State::STATE_AFFILIATION_LEFT => []
     ];
 
     public $table = 'affiliations';
@@ -207,10 +210,5 @@ class Affiliation extends Model
             'registry_id',
             'id'
         );
-    }
-
-    public function modelState(): MorphOne
-    {
-        return $this->morphOne(ModelState::class, 'stateable');
     }
 }

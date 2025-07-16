@@ -628,11 +628,6 @@ class Organisation extends Model
         return $this->belongsToMany(Charity::class, 'organisation_has_charity');
     }
 
-    public function modelState(): MorphOne
-    {
-        return $this->morphOne(ModelState::class, 'stateable');
-    }
-
     public function getEvaluationAttribute()
     {
         return $this->attributes['evaluation'] ?? null;
