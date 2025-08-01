@@ -744,7 +744,18 @@ class OrganisationController extends Controller
     {
         $projects = Project::searchViaRequest()
             ->applySorting()
-            ->with(['organisations', 'modelState.state'])
+            ->with([
+                'organisations' => function($query) use ($organisationId) {
+                    $query->where('organisations.id', $organisationId);
+                }, 
+                'modelState.state',
+                'custodianHasProjectOrganisation' => function($query) use ($organisationId) {
+                    $query->whereHas('projectOrganisation', function($query2) use ($organisationId) {
+                            $query2->where('organisation_id', $organisationId);
+                        })
+                    ->with('modelState.state');
+                },
+            ])
             ->whereHas('organisations', function ($query) use ($organisationId) {
                 $query->where('organisations.id', $organisationId);
             })

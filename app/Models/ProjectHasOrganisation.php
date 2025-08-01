@@ -66,4 +66,13 @@ class ProjectHasOrganisation extends Model
     {
         return $this->belongsTo(Project::class, 'project_id');
     }
+
+    public function custodianHasProjectOrganisation()
+    {
+        return $this->hasMany(
+            CustodianHasProjectOrganisation::class,
+            'project_has_organisation_id',
+            'id'
+        );
+    }
 }

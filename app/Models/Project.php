@@ -228,4 +228,28 @@ class Project extends Model
     {
         return static::$transitions;
     }
+
+    public function projectHasOrganisations()
+    {
+        return $this->hasMany(
+            ProjectHasOrganisation::class,
+            'project_id',    // FK on project_has_organisations
+            'id'             // local key on projects
+        );
+    }
+
+    /**
+     * Shortcut: All of the raw pivot rows linking this Project ↔ Organisation ↔ Custodian
+     */
+    public function custodianHasProjectOrganisation()
+    {
+        return $this->hasManyThrough(
+            CustodianHasProjectOrganisation::class,     // final model
+            ProjectHasOrganisation::class,              // through model
+            'project_id',                               // FK on project_has_organisations → projects.id
+            'project_has_organisation_id',              // FK on custodian_has_project_organisation → project_has_organisations.id
+            'id',                                       // local key on projects
+            'id'                                        // local key on project_has_organisations
+        );
+    }
 }

@@ -130,6 +130,72 @@ class ProjectController extends Controller
 
     /**
      * @OA\Get(
+     *      path="/api/v1/projects/{projectId}/organisations/{organisationId}",
+     *      summary="Get project details by projectID and organisationID",
+     *      description="Fetches project given organisation and project IDs.",
+     *      tags={"Project"},
+     *      @OA\Parameter(
+     *          name="organisationId",
+     *          in="path",
+     *          required=true,
+     *          description="ID of the organisation",
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Parameter(
+     *          name="projectId",
+     *          in="path",
+     *          required=true,
+     *          description="ID of the project",
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successfully retrieved project",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="success"),
+     *              @OA\Property(property="data", type="array",
+     *                  @OA\Items(
+     *                      ref="#/components/schemas/User"
+     *                  )
+     *              )
+     *          ),
+     *      ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="Project not found",
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(property="message", type="string", example="Project not found")
+     *          )
+     *      )
+     * )
+     */
+    public function getProjectByIdAndOrganisationId(Request $request, int $projectId, int $organisationId): JsonResponse
+    {
+        $project = Project::with([
+                'projectDetail', 
+                'custodians', 
+                'modelState.state',
+                'custodianHasProjectOrganisation' => function($query) use ($organisationId) {
+                    $query->whereHas('projectOrganisation', function($query2) use ($organisationId) {
+                            $query2->where('organisation_id', $organisationId);
+                        })
+                    ->with('modelState.state');
+                },
+            ])->findOrFail($projectId);
+
+        if ($project) {
+            return response()->json([
+                'message' => 'success',
+                'data' => $project,
+            ], 200);
+        }
+
+        throw new NotFoundException();
+    }
+
+    /**
+     * @OA\Get(
      *      path="/api/v1/projects/{id}/users",
      *      summary="Return project users by project ID",
      *      description="Return project users by project ID",
@@ -242,6 +308,82 @@ class ProjectController extends Controller
         return $this->OKResponse($projectUsers);
     }
 
+    /**
+     * @OA\Get(
+     *      path="/api/v1/projects/{projectId}/organisations/{organisationId}/users",
+     *      summary="Get all users by projectID and organisationID",
+     *      description="Fetches users given organisation and project IDs.",
+     *      tags={"Project"},
+     *      @OA\Parameter(
+     *          name="organisationId",
+     *          in="path",
+     *          required=true,
+     *          description="ID of the organisation",
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Parameter(
+     *          name="projectId",
+     *          in="path",
+     *          required=true,
+     *          description="ID of the project",
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successfully retrieved organisation users",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="success"),
+     *              @OA\Property(property="data", type="array",
+     *                  @OA\Items(
+     *                      ref="#/components/schemas/User"
+     *                  )
+     *              )
+     *          ),
+     *      ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="Organisation users not found",
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(property="message", type="string", example="Organisation users not found")
+     *          )
+     *      )
+     * )
+     */
+    public function getProjectUsersByOrganisationId(Request $request, int $projectId, int $organisationId): JsonResponse
+    {
+        $projectUsers = ProjectHasUser::with([
+            'registry.user',
+            'role',
+            'project.modelState.state',
+            'project' => function($query) use ($projectId, $organisationId) {
+                $query->where('id', $projectId)
+                    ->with([
+                        'custodianHasProjectOrganisation' => function($query2) use ($organisationId) {
+                            $query2->whereHas('projectOrganisation', function($query3) use ($organisationId) {
+                                $query3->where('organisation_id', $organisationId);
+                            })
+                            ->with('modelState.state');
+                        },
+                    ]);
+            },
+            'affiliation.organisation:id,organisation_name',
+        ])
+            ->where('project_id', $projectId)
+            ->whereHas('registry.user', function ($query) {
+                /** @phpstan-ignore-next-line */
+                $query->searchViaRequest()
+                    ->filterByState()
+                    ->with("modelState");
+            })
+            ->whereHas('affiliation.organisation', function ($query) use ($organisationId) {
+                /** @phpstan-ignore-next-line */
+                $query->where('id', $organisationId);
+            })
+            ->paginate((int)$this->getSystemConfig('PER_PAGE'));
+
+        return $this->OKResponse($projectUsers);
+    }
 
     public function getAllUsersFlagProject(Request $request, int $projectId): JsonResponse
     {

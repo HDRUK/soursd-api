@@ -2,26 +2,28 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use Exception;
 use Hash;
-use RegistryManagementController as RMC;
+use Exception;
 use TriggerEmail;
-use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Custodian;
-use App\Models\Organisation;
 use App\Models\Project;
+use App\Models\Custodian;
+use Illuminate\Support\Str;
+use App\Models\Organisation;
+use Illuminate\Http\Request;
 use App\Models\CustodianUser;
-use App\Models\ProjectHasCustodian;
+use App\Http\Traits\Responses;
+use App\Models\ProjectHasUser;
 use App\Traits\CommonFunctions;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use App\Http\Traits\Responses;
-use App\Models\ProjectHasOrganisation;
-use App\Models\ProjectHasUser;
-use App\Traits\SearchManagerCollection;
+use App\Models\ProjectHasCustodian;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Gate;
+use App\Models\ProjectHasOrganisation;
+use App\Models\CustodianHasProjectUser;
+use App\Traits\SearchManagerCollection;
+use RegistryManagementController as RMC;
+use App\Models\CustodianHasProjectOrganisation;
 
 /**
  * @OA\Tag(
@@ -1140,5 +1142,156 @@ class CustodianController extends Controller
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
+    }
+
+    /**
+     * @OA\Get(
+     *      path="/api/v1/custodians/{custodianId}/organisations/{organisationId}/projects/{projectId}/users/{userId}/statuses",
+     *      summary="Get statuses for a user in a project/organisation/custodian",
+     *      description="Fetches the user statuses given custodian and organisations and project and user IDs.",
+     *      tags={"Custodians"},
+     *      @OA\Parameter(
+     *          name="custodianId",
+     *          in="path",
+     *          required=true,
+     *          description="ID of the custodian",
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Parameter(
+     *          name="organisationId",
+     *          in="path",
+     *          required=true,
+     *          description="ID of the organiastion",
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Parameter(
+     *          name="projectId",
+     *          in="path",
+     *          required=true,
+     *          description="ID of the project",
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Parameter(
+     *          name="userId",
+     *          in="path",
+     *          required=true,
+     *          description="ID of the user",
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successfully retrieved organisation users",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="success"),
+     *              @OA\Property(property="data", type="array",
+     *                  @OA\Items(
+     *                      ref="#/components/schemas/User"
+     *                  )
+     *              )
+     *          ),
+     *      ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="Organisation users not found",
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(property="message", type="string", example="Organisation users not found")
+     *          )
+     *      )
+     * )
+     */
+    public function getStatusesUsers(Request $request, int $custodianId, int $organisationId, int $projectId, int $userId): JsonResponse
+    {
+        $projectStatus = $this->getProjectStatus($custodianId, $organisationId, $projectId, $userId);
+        $organisationStatus = $this->getOrganisationStatus($custodianId, $organisationId, $projectId, $userId);
+        $validationState = $this->getValidationState($custodianId, $organisationId, $projectId, $userId);
+        $affiliationStatus = $this->getAffiliationStatus($custodianId, $organisationId, $projectId, $userId);
+
+        return response()->json([
+            'message' => 'success',
+            'data' => [
+                'project_status' => $projectStatus,
+                'organisation_status' => $organisationStatus,
+                'validation_state' => $validationState,
+                'affiliation_status' => $affiliationStatus,
+            ],
+        ], 200);
+    }
+
+    // Hide from swagger docs
+    private function getValidationState(int $custodianId, int $organisationId, int $projectId, int $userId)
+    {
+        $record = CustodianHasProjectUser::with([
+                'modelState.state',
+            ])
+        ->where('custodian_has_project_has_user.custodian_id', $custodianId)
+        ->join('project_has_users', 'custodian_has_project_has_user.project_has_user_id', '=', 'project_has_users.id')
+        ->join('projects', 'project_has_users.project_id', '=', 'projects.id')
+        ->join('registries', 'project_has_users.user_digital_ident', '=', 'registries.digi_ident')
+        ->join('users', 'users.registry_id', '=', 'registries.id')
+        ->where('projects.id', $projectId)
+        ->where('users.id', $userId)
+        ->first();
+
+        return $record->modelState ?? null;
+    }
+
+    // Hide from swagger docs
+    private function getAffiliationStatus(int $custodianId, int $organisationId, int $projectId, int $userId)
+    {
+        $record = CustodianHasProjectUser::with([
+                'projectHasUser.affiliation.modelState.state',
+            ])
+        ->where('custodian_has_project_has_user.custodian_id', $custodianId)
+        ->join('project_has_users', 'custodian_has_project_has_user.project_has_user_id', '=', 'project_has_users.id')
+        ->join('projects', 'project_has_users.project_id', '=', 'projects.id')
+        ->join('registries', 'project_has_users.user_digital_ident', '=', 'registries.digi_ident')
+        ->join('users', 'users.registry_id', '=', 'registries.id')
+        ->where('projects.id', $projectId)
+        ->where('users.id', $userId)
+        ->first();
+
+        return optional($record->projectHasUser)->affiliation->modelState ?? null;
+    }
+
+    // Hide from swagger docs
+    private function getOrganisationStatus(int $custodianId, int $organisationId, int $projectId, int $userId)
+    {
+        $projectOrganisationId = ProjectHasOrganisation::where([
+            'organisation_id' => $organisationId,
+            'project_id' => $projectId
+        ])->first()->id;
+        
+        $records = CustodianHasProjectOrganisation::with([
+            'modelState.state',
+        ])
+            ->where([
+                'project_has_organisation_id' => $projectOrganisationId,
+                'custodian_id' => $custodianId
+            ])->first();
+
+        return $records->modelState ?? null;
+    }
+
+    // Hide from swagger docs
+    private function getProjectStatus(int $custodianId, int $organisationId, int $projectId, int $userId)
+    {
+        $records = Project::where('id', $projectId)
+            ->whereHas('projectUsers.registry.user', function($query) use ($userId) {
+                $query->where('users.id', $userId);
+            })
+            ->whereHas('organisations', function($query) use ($organisationId) {
+                $query->where('organisation_id', $organisationId);
+            })
+            ->whereHas('custodianHasProjectOrganisation', function($query) use ($custodianId) {
+                $query->where('custodian_id', $custodianId);
+            })
+            ->with([
+                'modelState.state',
+            ])
+            ->select(['id', 'title'])
+            ->first();
+
+        return $records->modelState ?? null;
     }
 }
