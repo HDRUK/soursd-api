@@ -60,6 +60,7 @@ return [
         'rules_engine_project_id' => env('RULES_ENGINE_PROJECT_ID'),
         'rules_engine_document_id' => env('RULES_ENGINE_DOCUMENT_ID'),
         'gateway_api_url' => env('GATEWAY_API_URL'),
+        'gateway_handoff_secret' => env('GATEWAY_HANDOFF_SECRET'),
         'scanning_filesystem_disk' => env('SCANNING_FILESYSTEM_DISK', 'local_scan'),
         'ror_api_url' => env('ROR_API_URL'),
         'registry_image_url' => env('REGISTRY_IMAGE_URL', 'https://storage.googleapis.com/hdruk-registry-assets/logo-horiz-colour.png'),
