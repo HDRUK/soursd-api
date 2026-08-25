@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\QueryController;
 use App\Http\Controllers\Api\V1\SectorController;
 use App\Http\Controllers\Api\V1\FeatureController;
+use App\Http\Controllers\Api\V1\HandoffCodeController;
 use App\Http\Controllers\Api\V1\HistoryController;
 use App\Http\Controllers\Api\V1\ProjectController;
 use App\Http\Controllers\Api\V1\WebhookController;
@@ -72,6 +73,11 @@ Route::middleware('api')->get('auth/me', [AuthController::class, 'me']);
 Route::middleware('api')->get('auth/me_unclaimed', [AuthController::class, 'meUnclaimed']);
 Route::middleware('api')->post('auth/register', [AuthController::class, 'registerKeycloakUser']);
 Route::middleware('api')->post('auth/claimUser/{userId}', [AuthController::class, 'claimUser']);
+
+// Gateway SSO handoff: speedi-as-web stores claims here after completing the Keycloak
+// exchange for a Gateway-originated login; Gateway redeems the code server-to-server.
+Route::middleware('api')->post('auth/gateway_handoff', [HandoffCodeController::class, 'store']);
+Route::middleware('verify.gateway.signature')->post('auth/gateway_handoff/{code}/redeem', [HandoffCodeController::class, 'redeem']);
 
 // --- USERS ---
 Route::middleware(['auth:api'])
