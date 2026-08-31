@@ -1433,7 +1433,7 @@ class OrganisationTest extends TestCase
         // Update should not change system_approved value - only allowed via the specific endpoint
         $finalSystemApproved = Organisation::where('id', $organisationIdTest)->value('system_approved');
         $this->assertEquals($latestOrganisationSystemApproved, $finalSystemApproved);
-        }
+    }
 
     public function test_the_application_can_update_organisations_approved_by_admin(): void
     {

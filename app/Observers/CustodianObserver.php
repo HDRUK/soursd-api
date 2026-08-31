@@ -17,13 +17,15 @@ class CustodianObserver
         // as a default installation
         $decisionModels = DecisionModel::all();
         foreach ($decisionModels as $d) {
-            CustodianModelConfig::updateOrCreate([
+            CustodianModelConfig::updateOrCreate(
+                [
                 'decision_model_id' => $d->id,
                 'custodian_id' => $custodian->id,
             ],
-            [
+                [
                 'active' => 1,
-            ]);
+            ]
+            );
         }
 
         foreach (Custodian::getDefaultActions() as $action) {

@@ -2,8 +2,9 @@
 
 use App\DeploymentSteps\DeploymentStep;
 use App\Models\DecisionModel;
+
 /**
- * 
+ *
  */
 return new class () extends DeploymentStep {
     public function handle(): void
@@ -11,7 +12,7 @@ return new class () extends DeploymentStep {
         try {
             $delegateRule = DecisionModel::where('name', 'Delegate/Key Contact')->update([
                 'conditions' => json_encode([
-                    "path" => "delegates", 
+                    "path" => "delegates",
                     "expects" => [
                         "minimum" => 1
                     ]
