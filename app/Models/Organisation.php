@@ -142,6 +142,16 @@ use App\Traits\FilterManager;
  *          type="string",
  *          example="2026-12-01"
  *      ),
+ *      @OA\Property(property="ce_or_iso_certified",
+ *          type="boolean",
+ *          example="true",
+ *          description="True if either CE or ISO 27001 certification is currently valid"
+ *      ),
+ *      @OA\Property(property="ce_plus_or_iso_certified",
+ *          type="boolean",
+ *          example="true",
+ *          description="True if either CE+ or ISO 27001 certification is currently valid"
+ *      ),
  *      @OA\Property(property="idvt_result",
  *          type="integer",
  *          example=1
@@ -315,18 +325,15 @@ use App\Traits\FilterManager;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereAddress2($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereApplicantNames($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCeCertificationNum($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCeCertified($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCeExpiryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCeExpiryEvidence($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCePlusCertificationNum($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCePlusCertified($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCePlusExpiryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCePlusExpiryEvidence($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCompaniesHouseNo($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCountry($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCounty($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereDsptkCertified($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereDsptkExpiryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereDsptkExpiryEvidence($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIcoExpiryEvidence($value)
@@ -338,7 +345,6 @@ use App\Traits\FilterManager;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIdvtResult($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIdvtResultPerc($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIso27001CertificationNum($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIso27001Certified($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIsoExpiryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIsoExpiryEvidence($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereLeadApplicantEmail($value)
