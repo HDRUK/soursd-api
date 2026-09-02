@@ -387,18 +387,14 @@ class Organisation extends Model
         'sub_license_arrangements',
         'verified',
         'dsptk_ods_code',
-        'dsptk_certified',
         'dsptk_expiry_date',
         'dsptk_expiry_evidence',
-        'iso_27001_certified',
         'iso_27001_certification_num',
         'iso_expiry_date',
         'iso_expiry_evidence',
-        'ce_certified',
         'ce_certification_num',
         'ce_expiry_date',
         'ce_expiry_evidence',
-        'ce_plus_certified',
         'ce_plus_certification_num',
         'ce_plus_expiry_date',
         'ce_plus_expiry_evidence',
@@ -463,8 +459,12 @@ class Organisation extends Model
 
     protected $appends = [
         'evaluation',
+        'ce_certified',
+        'ce_plus_certified',
+        'iso_27001_certified',
+        'dsptk_certified',
         'ce_or_iso_certified',
-        'ce_plus_or_iso_certified'
+        'ce_plus_or_iso_certified',
     ];
 
     public const ACTION_NAME_ADDRESS_COMPLETED = 'name_address_completed';
@@ -770,6 +770,26 @@ class Organisation extends Model
     public function getEvaluationAttribute()
     {
         return $this->attributes['evaluation'] ?? null;
+    }
+
+    public function getCeCertifiedAttribute()
+    {
+        return $this->ce_certification_num && $this->ce_expiry_date && $this->ce_expiry_date > now();
+    }
+
+    public function getCePlusCertifiedAttribute()
+    {
+        return $this->ce_plus_certification_num && $this->ce_plus_expiry_date && $this->ce_plus_expiry_date > now();
+    }
+
+    public function getIso27001CertifiedAttribute()
+    {
+        return $this->iso_27001_certification_num && $this->iso_expiry_date && $this->iso_expiry_date > now();
+    }
+
+    public function getDsptkCertifiedAttribute()
+    {
+        return $this->dsptk_ods_code && $this->dsptk_expiry_date && $this->dsptk_expiry_date > now();
     }
 
     public function getCeOrIsoCertifiedAttribute()
