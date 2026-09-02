@@ -22,6 +22,7 @@ class FeatureSeeder extends Seeder
             ['name' => 'sponsorship', 'value' => 'true', 'description' => 'sponsorship feature'],
             ['name' => 'christmas-banner', 'value' => 'false', 'description' => 'Enable the Christmas banner across the site.'],
             ['name' => 'EnterpriseSAMLSSOEnabled', 'value' => 'false', 'description' => 'Enable enterprise SAML SSO: admin approval workflow, Custodian/Organisation Admin self-service connection requests, and the domain-lookup sign-in step.'],
+            ['name' => 'LinkedIdentitiesEnabled', 'value' => 'true', 'description' => 'Enable linking external identity providers (ORCID, GitHub) to a researcher account.'],
         ];
 
         foreach ($globalFeatures as $feature) {
