@@ -63,6 +63,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *          type="string",
  *          example="https://keycloak.dev.hdruk.cloud/realms/SOURSD/broker/acme-corp/endpoint/descriptor",
  *          description="Downloadable SP metadata descriptor most IdPs can import directly - null until approved."
+ *      ),
+ *      @OA\Property(property="status",
+ *          type="string",
+ *          example="pending",
+ *          description="One of pending, approved, rejected"
+ *      ),
+ *      @OA\Property(property="submitted_by_user_id",
+ *          type="integer",
+ *          example=42,
+ *          description="ID of the user who submitted this tenant for approval"
+ *      ),
+ *      @OA\Property(property="rejected_reason",
+ *          type="string",
+ *          example="Metadata could not be validated",
+ *          description="Reason given when status is rejected - null otherwise"
  *      )
  * )
  */

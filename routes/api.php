@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\ProjectController;
 use App\Http\Controllers\Api\V1\WebhookController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\IdentityController;
+use App\Http\Controllers\Api\V1\LinkedIdentityController;
 use App\Http\Controllers\Api\V1\RegistryController;
 use App\Http\Controllers\Api\V1\TrainingController;
 use App\Http\Controllers\Api\V1\ActionLogController;
@@ -389,6 +390,16 @@ Route::middleware('auth:api')
         Route::post('/', 'store');
         Route::put('{id}', 'update');
         Route::delete('{id}', 'destroy');
+    });
+
+// --- LINKED IDENTITIES ---
+Route::middleware('auth:api')
+    ->prefix('v1/linked_identities')
+    ->controller(LinkedIdentityController::class)
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::post('{provider}', 'sync');
+        Route::delete('{provider}', 'unlink');
     });
 
 // --- ORGANISATIONS ---

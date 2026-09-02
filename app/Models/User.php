@@ -423,6 +423,14 @@ class User extends Authenticatable
         return $this->morphMany(ActionLog::class, 'entity');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\UserIdentity, \App\Models\User>
+     */
+    public function identities(): HasMany
+    {
+        return $this->hasMany(UserIdentity::class);
+    }
+
     public function isAdmin(): bool
     {
         return $this->user_group === self::GROUP_ADMINS;
