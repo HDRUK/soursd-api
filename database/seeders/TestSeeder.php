@@ -112,9 +112,6 @@ class TestSeeder extends Seeder
             'sub_license_arrangements' => '...',
             'verified' => false,
             'dsptk_ods_code' => '',
-            'iso_27001_certified' => false,
-            'ce_certified' => false,
-            'ce_plus_certified' => false,
             'companies_house_no' => '012345678',
             'sector_id' => 6, // Private/Industry
             'ror_id' => null,

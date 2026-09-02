@@ -239,16 +239,16 @@ use App\Traits\FilterManager;
  * @property string|null $sub_license_arrangements
  * @property bool $verified
  * @property string|null $dsptk_ods_code
- * @property int $dsptk_certified
+ * @property-read int $dsptk_certified
  * @property \Illuminate\Support\Carbon|null $dsptk_expiry_date
  * @property int|null $dsptk_expiry_evidence
  * @property int|null $ico_expiry_evidence
- * @property bool $iso_27001_certified
- * @property bool $ce_certified
+ * @property-read bool $iso_27001_certified
+ * @property-read bool $ce_certified
  * @property string|null $ce_certification_num
  * @property \Illuminate\Support\Carbon|null $ce_expiry_date
  * @property int|null $ce_expiry_evidence
- * @property int $ce_plus_certified
+ * @property-read int $ce_plus_certified
  * @property string|null $ce_plus_certification_num
  * @property \Illuminate\Support\Carbon|null $ce_plus_expiry_date
  * @property int|null $ce_plus_expiry_evidence

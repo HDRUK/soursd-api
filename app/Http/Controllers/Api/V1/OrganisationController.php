@@ -437,16 +437,12 @@ class OrganisationController extends Controller
                 'verified' => $input['verified'],
                 'companies_house_no' => $input['companies_house_no'],
                 'sector_id' => $input['sector_id'],
-                'dsptk_certified' => $input['dsptk_certified'],
                 'dsptk_ods_code' => $input['dsptk_ods_code'],
                 'dsptk_expiry_date' => $input['dsptk_expiry_date'],
-                'iso_27001_certified' => $input['iso_27001_certified'],
                 'iso_27001_certification_num' => $input['iso_27001_certification_num'],
                 'iso_expiry_date' => $input['iso_expiry_date'],
-                'ce_certified' => $input['ce_certified'],
                 'ce_certification_num' => $input['ce_certification_num'],
                 'ce_expiry_date' => $input['ce_expiry_date'],
-                'ce_plus_certified' => $input['ce_plus_certified'],
                 'ce_plus_certification_num' => $input['ce_plus_certification_num'],
                 'ce_plus_expiry_date' => $input['ce_plus_expiry_date'],
                 'ror_id' => $input['ror_id'],
@@ -533,16 +529,12 @@ class OrganisationController extends Controller
                 'verified' => 0,
                 'companies_house_no' => '',
                 'sector_id' => 0,
-                'dsptk_certified' => 0,
                 'dsptk_ods_code' => '',
                 'dsptk_expiry_date' => null,
-                'iso_27001_certified' => 0,
                 'iso_27001_certification_num' => '',
                 'iso_expiry_date' => null,
-                'ce_certified' => 0,
                 'ce_certification_num' => '',
                 'ce_expiry_date' => null,
-                'ce_plus_certified' => 0,
                 'ce_plus_certification_num' => '',
                 'ce_plus_expiry_date' => null,
                 'ror_id' => '',
@@ -617,16 +609,12 @@ class OrganisationController extends Controller
                 'verified' => 0,
                 'companies_house_no' => '',
                 'sector_id' => 0,
-                'dsptk_certified' => 0,
                 'dsptk_ods_code' => '',
                 'dsptk_expiry_date' => null,
-                'iso_27001_certified' => 0,
                 'iso_27001_certification_num' => '',
                 'iso_expiry_date' => null,
-                'ce_certified' => 0,
                 'ce_certification_num' => '',
                 'ce_expiry_date' => null,
-                'ce_plus_certified' => 0,
                 'ce_plus_certification_num' => '',
                 'ce_plus_expiry_date' => null,
                 'ror_id' => '',
@@ -893,6 +881,7 @@ class OrganisationController extends Controller
     public function countCertifications(GetCountCertifications $request, int $id): JsonResponse
     {
         try {
+            // SC: TODO: we need to check each individually
             $counts = DB::table('organisations')
                 ->select(DB::raw(
                     'dsptk_certified + ce_certified + iso_27001_certified as `count`'
