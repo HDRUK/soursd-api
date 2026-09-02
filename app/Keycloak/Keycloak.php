@@ -220,7 +220,7 @@ class Keycloak
     }
 
 
-    private static function getServiceToken(): string
+    protected static function getServiceToken(): string
     {
         if (!app()->bound(Octane::class) || !app(Octane::class)->isRunning()) {
             return self::getOrRefreshServiceToken();

@@ -134,7 +134,7 @@ class CustodianModelConfigController extends Controller
             $conf = CustodianModelConfig::firstOrCreate([
                 'decision_model_id' => $input['decision_model_id'],
                 'custodian_id' => $input['custodian_id'],
-            ],[
+            ], [
                 'active' => $input['active'],
             ]);
 

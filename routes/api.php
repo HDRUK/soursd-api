@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\ExperienceController;
 use App\Http\Controllers\Api\V1\FileUploadController;
 use App\Http\Controllers\Api\V1\PermissionController;
 use App\Http\Controllers\Api\V1\ResolutionController;
+use App\Http\Controllers\Api\V1\SsoTenantController;
 use App\Http\Controllers\Api\V1\SubsidiaryController;
 use App\Http\Controllers\Api\V1\AffiliationController;
 use App\Http\Controllers\Api\V1\EndorsementController;
@@ -261,6 +262,28 @@ Route::middleware(['auth:api'])
         // Delete
         Route::delete('/{id}', 'destroy');
     });
+
+// --- SSO TENANTS (enterprise SAML onboarding) ---
+Route::middleware(['auth:api', 'feature:EnterpriseSAMLSSOEnabled'])
+    ->prefix('v1/sso_tenants')
+    ->controller(SsoTenantController::class)
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{id}', 'show');
+        Route::post('/', 'store');
+        Route::put('/{id}', 'update');
+        Route::post('/{id}/approve', 'approve');
+        Route::post('/{id}/reject', 'reject');
+        Route::post('/{id}/reimport', 'reimportMetadata');
+        Route::post('/{id}/enable', 'enable');
+        Route::delete('/{id}', 'destroy');
+        Route::delete('/{id}/purge', 'purge');
+    });
+
+// Unauthenticated - runs before the user has a session, so it can't sit
+// behind auth:api. Throttled since it's a domain-existence oracle otherwise.
+Route::middleware(['throttle:30,1', 'feature:EnterpriseSAMLSSOEnabled'])
+    ->post('v1/sso/lookup', [SsoTenantController::class, 'lookupDomain']);
 
 
 // --- CUSTODIAN USERS ---
