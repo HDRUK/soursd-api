@@ -461,7 +461,11 @@ class Organisation extends Model
             'files'
          ];
 
-    protected $appends = ['evaluation'];
+    protected $appends = [
+        'evaluation',
+        'ce_or_iso_certified',
+        'ce_plus_or_iso_certified'
+    ];
 
     public const ACTION_NAME_ADDRESS_COMPLETED = 'name_address_completed';
     public const ACTION_DIGITAL_ID_COMPLETED = 'digital_identifiers_completed';
@@ -766,5 +770,15 @@ class Organisation extends Model
     public function getEvaluationAttribute()
     {
         return $this->attributes['evaluation'] ?? null;
+    }
+
+    public function getCeOrIsoCertifiedAttribute()
+    {
+        return $this->ce_certified || $this->iso_27001_certified;
+    }
+
+    public function getCePlusOrIsoCertifiedAttribute()
+    {
+        return $this->ce_plus_certified || $this->iso_27001_certified;
     }
 }
