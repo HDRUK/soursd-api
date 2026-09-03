@@ -142,6 +142,16 @@ use App\Traits\FilterManager;
  *          type="string",
  *          example="2026-12-01"
  *      ),
+ *      @OA\Property(property="ce_or_iso_certified",
+ *          type="boolean",
+ *          example="true",
+ *          description="True if either CE or ISO 27001 certification is currently valid"
+ *      ),
+ *      @OA\Property(property="ce_plus_or_iso_certified",
+ *          type="boolean",
+ *          example="true",
+ *          description="True if either CE+ or ISO 27001 certification is currently valid"
+ *      ),
  *      @OA\Property(property="idvt_result",
  *          type="integer",
  *          example=1
@@ -239,16 +249,16 @@ use App\Traits\FilterManager;
  * @property string|null $sub_license_arrangements
  * @property bool $verified
  * @property string|null $dsptk_ods_code
- * @property int $dsptk_certified
+ * @property-read int $dsptk_certified
  * @property \Illuminate\Support\Carbon|null $dsptk_expiry_date
  * @property int|null $dsptk_expiry_evidence
  * @property int|null $ico_expiry_evidence
- * @property bool $iso_27001_certified
- * @property bool $ce_certified
+ * @property-read bool $iso_27001_certified
+ * @property-read bool $ce_certified
  * @property string|null $ce_certification_num
  * @property \Illuminate\Support\Carbon|null $ce_expiry_date
  * @property int|null $ce_expiry_evidence
- * @property int $ce_plus_certified
+ * @property-read int $ce_plus_certified
  * @property string|null $ce_plus_certification_num
  * @property \Illuminate\Support\Carbon|null $ce_plus_expiry_date
  * @property int|null $ce_plus_expiry_evidence
@@ -315,18 +325,15 @@ use App\Traits\FilterManager;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereAddress2($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereApplicantNames($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCeCertificationNum($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCeCertified($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCeExpiryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCeExpiryEvidence($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCePlusCertificationNum($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCePlusCertified($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCePlusExpiryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCePlusExpiryEvidence($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCompaniesHouseNo($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCountry($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCounty($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereDsptkCertified($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereDsptkExpiryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereDsptkExpiryEvidence($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIcoExpiryEvidence($value)
@@ -338,7 +345,6 @@ use App\Traits\FilterManager;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIdvtResult($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIdvtResultPerc($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIso27001CertificationNum($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIso27001Certified($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIsoExpiryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereIsoExpiryEvidence($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organisation whereLeadApplicantEmail($value)
@@ -387,18 +393,14 @@ class Organisation extends Model
         'sub_license_arrangements',
         'verified',
         'dsptk_ods_code',
-        'dsptk_certified',
         'dsptk_expiry_date',
         'dsptk_expiry_evidence',
-        'iso_27001_certified',
         'iso_27001_certification_num',
         'iso_expiry_date',
         'iso_expiry_evidence',
-        'ce_certified',
         'ce_certification_num',
         'ce_expiry_date',
         'ce_expiry_evidence',
-        'ce_plus_certified',
         'ce_plus_certification_num',
         'ce_plus_expiry_date',
         'ce_plus_expiry_evidence',
@@ -461,7 +463,15 @@ class Organisation extends Model
             'files'
          ];
 
-    protected $appends = ['evaluation'];
+    protected $appends = [
+        'evaluation',
+        'ce_certified',
+        'ce_plus_certified',
+        'iso_27001_certified',
+        'dsptk_certified',
+        'ce_or_iso_certified',
+        'ce_plus_or_iso_certified',
+    ];
 
     public const ACTION_NAME_ADDRESS_COMPLETED = 'name_address_completed';
     public const ACTION_DIGITAL_ID_COMPLETED = 'digital_identifiers_completed';
@@ -766,5 +776,35 @@ class Organisation extends Model
     public function getEvaluationAttribute()
     {
         return $this->attributes['evaluation'] ?? null;
+    }
+
+    public function getCeCertifiedAttribute()
+    {
+        return $this->ce_certification_num && $this->ce_expiry_date && $this->ce_expiry_date > now();
+    }
+
+    public function getCePlusCertifiedAttribute()
+    {
+        return $this->ce_plus_certification_num && $this->ce_plus_expiry_date && $this->ce_plus_expiry_date > now();
+    }
+
+    public function getIso27001CertifiedAttribute()
+    {
+        return $this->iso_27001_certification_num && $this->iso_expiry_date && $this->iso_expiry_date > now();
+    }
+
+    public function getDsptkCertifiedAttribute()
+    {
+        return $this->dsptk_ods_code && $this->dsptk_expiry_date && $this->dsptk_expiry_date > now();
+    }
+
+    public function getCeOrIsoCertifiedAttribute()
+    {
+        return $this->ce_certified || $this->iso_27001_certified;
+    }
+
+    public function getCePlusOrIsoCertifiedAttribute()
+    {
+        return $this->ce_plus_certified || $this->iso_27001_certified;
     }
 }
