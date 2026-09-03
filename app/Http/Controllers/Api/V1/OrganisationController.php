@@ -881,24 +881,25 @@ class OrganisationController extends Controller
     public function countCertifications(GetCountCertifications $request, int $id): JsonResponse
     {
         try {
-            // SC: TODO: we need to check each individually
-            $counts = DB::table('organisations')
-                ->select(DB::raw(
-                    'dsptk_certified + ce_certified + iso_27001_certified as `count`'
-                ))
-                ->where('id', $id)
-                ->get();
+            $organisation = Organisation::findOrFail($id);
 
-            if ($counts && count($counts) > 0) {
-                return response()->json([
-                    'message' => 'success',
-                    'data' => $counts[0]->count,
-                ], 200);
+            $counts = 0;
+            if ($organisation->dsptk_ods_code && $organisation->dsptk_expiry_date && $organisation->dsptk_expiry_date > Carbon::now()) {
+                $counts++;
+            }
+            if ($organisation->ce_certification_num && $organisation->ce_expiry_date && $organisation->ce_expiry_date > Carbon::now()) {
+                $counts++;
+            }
+            if ($organisation->ce_plus_certification_num && $organisation->ce_plus_expiry_date && $organisation->ce_plus_expiry_date > Carbon::now()) {
+                $counts++;
+            }
+            if ($organisation->iso_27001_certification_num && $organisation->iso_expiry_date && $organisation->iso_expiry_date > Carbon::now()) {
+                $counts++;
             }
 
             return response()->json([
                 'message' => 'success',
-                'data' => 0,
+                'data' => $counts,
             ], 200);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
