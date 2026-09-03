@@ -883,19 +883,12 @@ class OrganisationController extends Controller
         try {
             $organisation = Organisation::findOrFail($id);
 
-            $counts = 0;
-            if ($organisation->dsptk_ods_code && $organisation->dsptk_expiry_date && $organisation->dsptk_expiry_date > Carbon::now()) {
-                $counts++;
-            }
-            if ($organisation->ce_certification_num && $organisation->ce_expiry_date && $organisation->ce_expiry_date > Carbon::now()) {
-                $counts++;
-            }
-            if ($organisation->ce_plus_certification_num && $organisation->ce_plus_expiry_date && $organisation->ce_plus_expiry_date > Carbon::now()) {
-                $counts++;
-            }
-            if ($organisation->iso_27001_certification_num && $organisation->iso_expiry_date && $organisation->iso_expiry_date > Carbon::now()) {
-                $counts++;
-            }
+            $counts = count(array_filter([
+                $organisation->dsptk_certified,
+                $organisation->ce_certified,
+                $organisation->ce_plus_certified,
+                $organisation->iso_27001_certified
+            ]));
 
             return response()->json([
                 'message' => 'success',
