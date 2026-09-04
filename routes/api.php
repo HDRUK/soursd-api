@@ -294,10 +294,10 @@ Route::middleware('auth:api')
     ->group(function () {
         Route::get('/', 'index');
         Route::get('{id}', 'show');
-        Route::post('/', 'store');
-        Route::put('{id}', 'update');
-        Route::delete('{id}', 'destroy');
-        Route::post('invite/{id}', 'invite');
+        Route::post('/', 'store')->middleware('check.custodian.admin');
+        Route::put('{id}', 'update')->middleware('check.custodian.admin');
+        Route::delete('{id}', 'destroy')->middleware('check.custodian.admin');
+        Route::post('invite/{id}', 'invite')->middleware('check.custodian.admin');
     });
 
 // --- DEPARTMENTS ---
