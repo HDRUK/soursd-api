@@ -576,21 +576,21 @@ class CustodianUserController extends Controller
     {
         try {
             $loggedInUserId = $request->user()?->id;
-            $user = CustodianUser::where('id', $id)->first();
+            $custodianUser = CustodianUser::where('id', $id)->first();
 
             $perm = Permission::where('name', 'CUSTODIAN_APPROVER')->first();
             $checking = CustodianUserHasPermission::where([
-                'custodian_user_id' => $user->id,
+                'custodian_user_id' => $custodianUser->id,
                 'permission_id' => $perm->id,
             ])->first();
 
             if (!is_null($checking)) {
-                $this->notifyOnRemovedApprover($loggedInUserId, $user);
+                $this->notifyOnRemovedApprover($loggedInUserId, $custodianUser);
             }
 
-            CustodianUserHasPermission::where('custodian_user_id', $user->id)->delete();
+            CustodianUserHasPermission::where('custodian_user_id', $custodianUser->id)->delete();
 
-            $user->delete();
+            $custodianUser->delete();
 
             return response()->json([
                 'message' => 'success',
