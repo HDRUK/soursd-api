@@ -8,6 +8,15 @@ use App\Models\User;
 
 class CustodianUserPolicy
 {
+    public function before(User $user): bool|null
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return null;
+    }
+
     public function create(User $user): bool
     {
         return $this->isCustodianAdmin($user) || $this->isCustodianApprover($user);
