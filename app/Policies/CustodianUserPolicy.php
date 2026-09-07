@@ -10,12 +10,21 @@ class CustodianUserPolicy
 {
     public function create(User $user): bool
     {
-        return $this->isCustodianAdmin($user);
+        return $this->isCustodianAdmin($user) || $this->isCustodianApprover($user);
     }
 
     public function update(User $user, CustodianUser $custodianUser): bool
     {
-        return $this->isCustodianAdmin($user) && $this->sameCustodian($user, $custodianUser);
+        if (! $this->sameCustodian($user, $custodianUser)) {
+            return false;
+        }
+
+        if ($this->isCustodianAdmin($user)) {
+            return true;
+        }
+
+        // A CUSTODIAN_APPROVER may manage other custodian users, but not a CUSTODIAN_ADMIN.
+        return $this->isCustodianApprover($user) && ! $this->custodianUserHasPermission($custodianUser->id, 'CUSTODIAN_ADMIN');
     }
 
     public function delete(User $user, CustodianUser $custodianUser): bool
@@ -30,12 +39,20 @@ class CustodianUserPolicy
 
     private function isCustodianAdmin(User $user): bool
     {
-        if (! $user->custodian_user_id) {
-            return false;
-        }
+        return $user->custodian_user_id
+            && $this->custodianUserHasPermission($user->custodian_user_id, 'CUSTODIAN_ADMIN');
+    }
 
-        return CustodianUserHasPermission::where('custodian_user_id', $user->custodian_user_id)
-            ->whereHas('permission', fn ($query) => $query->where('name', 'CUSTODIAN_ADMIN'))
+    private function isCustodianApprover(User $user): bool
+    {
+        return $user->custodian_user_id
+            && $this->custodianUserHasPermission($user->custodian_user_id, 'CUSTODIAN_APPROVER');
+    }
+
+    private function custodianUserHasPermission(int $custodianUserId, string $permissionName): bool
+    {
+        return CustodianUserHasPermission::where('custodian_user_id', $custodianUserId)
+            ->whereHas('permission', fn ($query) => $query->where('name', $permissionName))
             ->exists();
     }
 

@@ -314,6 +314,31 @@ class CustodianUserTest extends TestCase
         ]);
     }
 
+    /**
+     * Create a User + linked CustodianUser in the given custodian, holding the given permission.
+     *
+     * @return array{0: User, 1: CustodianUser}
+     */
+    private function makeCustodianUserActor(int $custodianId, string $permissionName): array
+    {
+        $custodianUser = CustodianUser::factory()->create(['custodian_id' => $custodianId]);
+        $user = User::factory()->create([
+            'user_group' => User::GROUP_CUSTODIANS,
+            'email' => $custodianUser->email,
+            'keycloak_id' => (string) Str::uuid(),
+            'custodian_user_id' => $custodianUser->id,
+            'unclaimed' => 0,
+        ]);
+
+        $permission = Permission::where('name', $permissionName)->firstOrFail();
+        CustodianUserHasPermission::create([
+            'custodian_user_id' => $custodianUser->id,
+            'permission_id' => $permission->id,
+        ]);
+
+        return [$user, $custodianUser];
+    }
+
     public function test_creating_a_custodian_user_requires_the_custodian_admin_permission(): void
     {
         // custodian_admin fixture from BaseDemoSeeder already carries CUSTODIAN_ADMIN,
@@ -423,5 +448,90 @@ class CustodianUserTest extends TestCase
             );
 
         $response->assertStatus(200);
+    }
+
+    public function test_a_custodian_approver_can_create_custodian_users(): void
+    {
+        $custodianId = CustodianUser::find($this->custodian_admin->custodian_user_id)->custodian_id;
+        [$approver] = $this->makeCustodianUserActor($custodianId, 'CUSTODIAN_APPROVER');
+
+        $response = $this->actingAsKeycloakUser($approver, $this->getMockedKeycloakPayload())
+            ->actingAs($approver)
+            ->json(
+                'POST',
+                self::TEST_URL,
+                [
+                    'first_name' => fake()->firstname(),
+                    'last_name' => fake()->lastname(),
+                    'email' => fake()->email(),
+                ]
+            );
+
+        $response->assertStatus(201);
+    }
+
+    public function test_a_custodian_approver_can_update_a_non_admin_custodian_user_in_their_own_custodian(): void
+    {
+        $custodianId = CustodianUser::find($this->custodian_admin->custodian_user_id)->custodian_id;
+        [$approver] = $this->makeCustodianUserActor($custodianId, 'CUSTODIAN_APPROVER');
+        $teammate = CustodianUser::factory()->create(['custodian_id' => $custodianId]);
+
+        $response = $this->actingAsKeycloakUser($approver, $this->getMockedKeycloakPayload())
+            ->actingAs($approver)
+            ->json(
+                'PUT',
+                self::TEST_URL . '/' . $teammate->id,
+                [
+                    'first_name' => 'Updated',
+                    'last_name' => 'Name',
+                ]
+            );
+
+        $response->assertStatus(200);
+    }
+
+    public function test_a_custodian_approver_cannot_update_a_custodian_admin(): void
+    {
+        $custodianId = CustodianUser::find($this->custodian_admin->custodian_user_id)->custodian_id;
+        [$approver] = $this->makeCustodianUserActor($custodianId, 'CUSTODIAN_APPROVER');
+
+        $adminTarget = CustodianUser::factory()->create(['custodian_id' => $custodianId]);
+        $this->grantCustodianAdmin($adminTarget);
+
+        $response = $this->actingAsKeycloakUser($approver, $this->getMockedKeycloakPayload())
+            ->actingAs($approver)
+            ->json(
+                'PUT',
+                self::TEST_URL . '/' . $adminTarget->id,
+                [
+                    'first_name' => 'Should Not',
+                    'last_name' => 'Apply',
+                ]
+            );
+
+        $response->assertStatus(403);
+        $this->assertEquals(
+            $adminTarget->first_name,
+            CustodianUser::find($adminTarget->id)->first_name
+        );
+    }
+
+    public function test_a_custodian_approver_cannot_delete_a_custodian_admin(): void
+    {
+        $custodianId = CustodianUser::find($this->custodian_admin->custodian_user_id)->custodian_id;
+        [$approver] = $this->makeCustodianUserActor($custodianId, 'CUSTODIAN_APPROVER');
+
+        $adminTarget = CustodianUser::factory()->create(['custodian_id' => $custodianId]);
+        $this->grantCustodianAdmin($adminTarget);
+
+        $response = $this->actingAsKeycloakUser($approver, $this->getMockedKeycloakPayload())
+            ->actingAs($approver)
+            ->json(
+                'DELETE',
+                self::TEST_URL . '/' . $adminTarget->id
+            );
+
+        $response->assertStatus(403);
+        $this->assertNotNull(CustodianUser::find($adminTarget->id));
     }
 }
