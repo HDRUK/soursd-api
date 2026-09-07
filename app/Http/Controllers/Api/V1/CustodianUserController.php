@@ -198,7 +198,7 @@ class CustodianUserController extends Controller
 
             $isApprover = false;
 
-            $user = CustodianUser::create([
+            $custodianUser = CustodianUser::create([
                 'first_name' => $input['first_name'],
                 'last_name' => $input['last_name'],
                 'email' => $input['email'],
@@ -209,7 +209,7 @@ class CustodianUserController extends Controller
 
             if (isset($input['permissions'])) {
                 CustodianUserHasPermission::where([
-                    'custodian_user_id' => $user->id,
+                    'custodian_user_id' => $custodianUser->id,
                 ])->delete();
 
                 $perms = Permission::whereIn('id', $input['permissions'])->get();
@@ -219,19 +219,19 @@ class CustodianUserController extends Controller
                         $isApprover = true;
                     }
                     $p = CustodianUserHasPermission::create([
-                        'custodian_user_id' => $user->id,
+                        'custodian_user_id' => $custodianUser->id,
                         'permission_id' => $perm->id,
                     ]);
                 }
             }
 
             if ($isApprover) {
-                $this->notifyOnAddedApprover($loggedInUserId, $user);
+                $this->notifyOnAddedApprover($loggedInUserId, $custodianUser);
             }
 
             return response()->json([
                 'message' => 'success',
-                'data' => $user->id,
+                'data' => $custodianUser->id,
             ], 201);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
@@ -328,7 +328,7 @@ class CustodianUserController extends Controller
                     continue;
                 }
 
-                $user = CustodianUser::create([
+                $custodianUser = CustodianUser::create([
                     'first_name'   => $userInput['first_name'],
                     'last_name'    => $userInput['last_name'],
                     'email'        => $userInput['email'],
@@ -337,7 +337,7 @@ class CustodianUserController extends Controller
                     'custodian_id' => $custodianId,
                 ]);
 
-                $createdUserIds[] = $user->id;
+                $createdUserIds[] = $custodianUser->id;
 
                 $permission = Permission::where('name', $userInput['permission'])->first();
 
@@ -346,7 +346,7 @@ class CustodianUserController extends Controller
                 }
 
                 CustodianUserHasPermission::create([
-                    'custodian_user_id' => $user->id,
+                    'custodian_user_id' => $custodianUser->id,
                     'permission_id'     => $permission->id,
                 ]);
             }
@@ -432,33 +432,33 @@ class CustodianUserController extends Controller
 
             $custodianId = CustodianUser::where('id', $loggedInCustodianUserId)->first()->custodian_id;
 
-            $user = CustodianUser::where('id', $id)->first();
-            $user->first_name = isset($input['first_name']) ? $input['first_name'] : $user->first_name;
-            $user->last_name = isset($input['last_name']) ? $input['last_name'] : $user->last_name;
-            $user->email = isset($input['email']) ? $input['email'] : $user->email;
-            $user->password = isset($input['password']) ? Hash::make($input['password']) : $user->password;
-            $user->provider = isset($input['provider']) ? $input['provider'] : $user->provider;
-            $user->keycloak_id = isset($input['keycloak_id']) ? $input['keycloak_id'] : $user->keycloak_id;
-            $user->custodian_id = isset($custodianId) ? $custodianId : $user->custodian_id;
+            $custodianUser = CustodianUser::where('id', $id)->first();
+            $custodianUser->first_name = isset($input['first_name']) ? $input['first_name'] : $custodianUser->first_name;
+            $custodianUser->last_name = isset($input['last_name']) ? $input['last_name'] : $custodianUser->last_name;
+            $custodianUser->email = isset($input['email']) ? $input['email'] : $custodianUser->email;
+            $custodianUser->password = isset($input['password']) ? Hash::make($input['password']) : $custodianUser->password;
+            $custodianUser->provider = isset($input['provider']) ? $input['provider'] : $custodianUser->provider;
+            $custodianUser->keycloak_id = isset($input['keycloak_id']) ? $input['keycloak_id'] : $custodianUser->keycloak_id;
+            $custodianUser->custodian_id = isset($custodianId) ? $custodianId : $custodianUser->custodian_id;
 
             if (isset($input['permissions'])) {
                 CustodianUserHasPermission::where([
-                    'custodian_user_id' => $user->id,
+                    'custodian_user_id' => $custodianUser->id,
                 ])->delete();
 
                 $perms = Permission::whereIn('id', $input['permissions'])->get();
                 foreach ($perms as $perm) {
                     $p = CustodianUserHasPermission::create([
-                        'custodian_user_id' => $user->id,
+                        'custodian_user_id' => $custodianUser->id,
                         'permission_id' => $perm->id,
                     ]);
                 }
             }
 
-            if ($user->save()) {
+            if ($custodianUser->save()) {
                 return response()->json([
                     'message' => 'success',
-                    'data' => $user,
+                    'data' => $custodianUser,
                 ], 200);
             }
 
@@ -476,7 +476,7 @@ class CustodianUserController extends Controller
     public function invite(InviteCustodianUser $request, int $id): JsonResponse
     {
         try {
-            $user = CustodianUser::where('id', $id)->first();
+            $custodianUser = CustodianUser::where('id', $id)->first();
 
             $custodianUserPermissions = CustodianUserHasPermission::where('custodian_user_id', $id)->first();
             $permissions = Permission::where('id', $custodianUserPermissions->permission_id)->first();
@@ -485,9 +485,9 @@ class CustodianUserController extends Controller
              * Observer is also creating the keycloak user
              */
             $unclaimedUser = RMC::createUnclaimedUser([
-                'firstname' => $user['first_name'],
-                'lastname' => $user['last_name'],
-                'email' => $user['email'],
+                'firstname' => $custodianUser['first_name'],
+                'lastname' => $custodianUser['last_name'],
+                'email' => $custodianUser['email'],
                 'user_group' => 'CUSTODIANS',
                 'custodian_user_id' => $id,
                 'invited_by' => $request->user()->id,
@@ -504,7 +504,7 @@ class CustodianUserController extends Controller
 
             $input = [
                 'type' => 'CUSTODIAN_USER',
-                'to' => $user->id,
+                'to' => $custodianUser->id,
                 'unclaimed_user_id' => $unclaimedUser->id,
                 'by' => $id,
                 'identifier' => $emailIdentifier
@@ -514,7 +514,7 @@ class CustodianUserController extends Controller
 
             return response()->json([
                 'message' => 'success',
-                'data' => $user,
+                'data' => $custodianUser,
             ], 201);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
@@ -576,21 +576,21 @@ class CustodianUserController extends Controller
     {
         try {
             $loggedInUserId = $request->user()?->id;
-            $user = CustodianUser::where('id', $id)->first();
+            $custodianUser = CustodianUser::where('id', $id)->first();
 
             $perm = Permission::where('name', 'CUSTODIAN_APPROVER')->first();
             $checking = CustodianUserHasPermission::where([
-                'custodian_user_id' => $user->id,
+                'custodian_user_id' => $custodianUser->id,
                 'permission_id' => $perm->id,
             ])->first();
 
             if (!is_null($checking)) {
-                $this->notifyOnRemovedApprover($loggedInUserId, $user);
+                $this->notifyOnRemovedApprover($loggedInUserId, $custodianUser);
             }
 
-            CustodianUserHasPermission::where('custodian_user_id', $user->id)->delete();
+            CustodianUserHasPermission::where('custodian_user_id', $custodianUser->id)->delete();
 
-            $user->delete();
+            $custodianUser->delete();
 
             return response()->json([
                 'message' => 'success',
