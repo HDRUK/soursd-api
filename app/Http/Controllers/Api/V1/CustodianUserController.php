@@ -14,6 +14,7 @@ use App\Models\Custodian;
 use App\Models\CustodianUser;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Gate;
 use RegistryManagementController as RMC;
 use App\Models\CustodianUserHasPermission;
 use App\Http\Requests\CustodianUsers\GetCustodianUser;
@@ -188,6 +189,10 @@ class CustodianUserController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
+            if (! Gate::allows('create', CustodianUser::class)) {
+                return $this->ForbiddenResponse();
+            }
+
             $input = $request->all();
             $loggedInUser =  $request->user();
 
@@ -433,6 +438,11 @@ class CustodianUserController extends Controller
             $custodianId = CustodianUser::where('id', $loggedInCustodianUserId)->first()->custodian_id;
 
             $user = CustodianUser::where('id', $id)->first();
+
+            if (! Gate::allows('update', $user)) {
+                return $this->ForbiddenResponse();
+            }
+
             $user->first_name = isset($input['first_name']) ? $input['first_name'] : $user->first_name;
             $user->last_name = isset($input['last_name']) ? $input['last_name'] : $user->last_name;
             $user->email = isset($input['email']) ? $input['email'] : $user->email;
@@ -477,6 +487,10 @@ class CustodianUserController extends Controller
     {
         try {
             $user = CustodianUser::where('id', $id)->first();
+
+            if (! Gate::allows('invite', $user)) {
+                return $this->ForbiddenResponse();
+            }
 
             $custodianUserPermissions = CustodianUserHasPermission::where('custodian_user_id', $id)->first();
             $permissions = Permission::where('id', $custodianUserPermissions->permission_id)->first();
@@ -577,6 +591,10 @@ class CustodianUserController extends Controller
         try {
             $loggedInUserId = $request->user()?->id;
             $custodianUser = CustodianUser::where('id', $id)->first();
+
+            if (! Gate::allows('delete', $custodianUser)) {
+                return $this->ForbiddenResponse();
+            }
 
             $perm = Permission::where('name', 'CUSTODIAN_APPROVER')->first();
             $checking = CustodianUserHasPermission::where([

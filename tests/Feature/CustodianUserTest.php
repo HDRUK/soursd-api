@@ -187,7 +187,8 @@ class CustodianUserTest extends TestCase
         $content = $response->decodeResponseJson()['data'];
         $this->assertGreaterThan(0, $content);
 
-        $response = $this->actingAsKeycloakUser($this->user, $this->getMockedKeycloakPayload())
+        $response = $this->actingAsKeycloakUser($this->custodian_admin, $this->getMockedKeycloakPayload())
+            ->actingAs($this->custodian_admin)
             ->json(
                 'DELETE',
                 self::TEST_URL . '/' . $content
@@ -219,6 +220,8 @@ class CustodianUserTest extends TestCase
 
         //CustodianUser::truncate();
 
+        $approverPermissionId = Permission::where('name', 'CUSTODIAN_APPROVER')->firstOrFail()->id;
+
         $response = $this->actingAsKeycloakUser($this->custodian_admin, $this->getMockedKeycloakPayload())
             ->actingAs($this->custodian_admin)
             ->json(
@@ -230,17 +233,19 @@ class CustodianUserTest extends TestCase
                     'email' => fake()->email(),
                     'password' => Str::random(12),
                     'provider' => fake()->word(),
-                    'keycloak_id' => ''
+                    'keycloak_id' => '',
+                    'permissions' => [$approverPermissionId],
                 ]
             );
 
         $response->assertStatus(201);
+        $createdId = $response->decodeResponseJson()['data'];
 
         $response = $this->actingAsKeycloakUser($this->custodian_admin, $this->getMockedKeycloakPayload())
             ->actingAs($this->custodian_admin)
             ->json(
                 'POST',
-                self::TEST_URL . '/invite/1'
+                self::TEST_URL . '/invite/' . $createdId
             );
 
         Queue::assertPushed(SendEmailJob::class);
@@ -311,8 +316,6 @@ class CustodianUserTest extends TestCase
 
     public function test_creating_a_custodian_user_requires_the_custodian_admin_permission(): void
     {
-        $this->enableMiddleware();
-
         // custodian_admin fixture from BaseDemoSeeder already carries CUSTODIAN_ADMIN,
         // so use a custodian user with no permissions at all to test the negative case.
         $nonAdminCustodianUser = CustodianUser::factory()->create();
@@ -341,7 +344,6 @@ class CustodianUserTest extends TestCase
 
     public function test_a_custodian_admin_can_create_custodian_users(): void
     {
-        $this->enableMiddleware();
         $this->grantCustodianAdmin(CustodianUser::find($this->custodian_admin->custodian_user_id));
 
         $response = $this->actingAsKeycloakUser($this->custodian_admin, $this->getMockedKeycloakPayload())
@@ -361,7 +363,6 @@ class CustodianUserTest extends TestCase
 
     public function test_a_custodian_admin_cannot_update_a_custodian_user_belonging_to_another_custodian(): void
     {
-        $this->enableMiddleware();
         $this->grantCustodianAdmin(CustodianUser::find($this->custodian_admin->custodian_user_id));
 
         $otherCustodian = Custodian::factory()->create();
@@ -387,7 +388,6 @@ class CustodianUserTest extends TestCase
 
     public function test_a_custodian_admin_cannot_delete_a_custodian_user_belonging_to_another_custodian(): void
     {
-        $this->enableMiddleware();
         $this->grantCustodianAdmin(CustodianUser::find($this->custodian_admin->custodian_user_id));
 
         $otherCustodian = Custodian::factory()->create();
@@ -406,7 +406,6 @@ class CustodianUserTest extends TestCase
 
     public function test_a_custodian_admin_can_update_a_custodian_user_belonging_to_their_own_custodian(): void
     {
-        $this->enableMiddleware();
         $ownCustodianUser = CustodianUser::find($this->custodian_admin->custodian_user_id);
         $this->grantCustodianAdmin($ownCustodianUser);
 
