@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\Registry;
 use App\Models\ActionLog;
 use App\Models\Custodian;
+use App\Models\CustodianUser;
 use App\Models\Organisation;
 use App\Policies\UserPolicy;
 use App\Policies\ProjectPolicy;
@@ -15,6 +16,7 @@ use App\Policies\RegistryPolicy;
 use App\Policies\ActionLogPolicy;
 use App\Policies\AffiliationPolicy;
 use App\Policies\CustodianPolicy;
+use App\Policies\CustodianUserPolicy;
 use App\Policies\OrganisationPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -29,6 +31,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         ActionLog::class => ActionLogPolicy::class,
         Custodian::class => CustodianPolicy::class,
+        CustodianUser::class => CustodianUserPolicy::class,
         Organisation::class => OrganisationPolicy::class,
         Project::class => ProjectPolicy::class,
         Registry::class => RegistryPolicy::class,
