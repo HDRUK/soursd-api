@@ -10,6 +10,7 @@ use App\Http\Traits\Responses;
 use App\Models\DecisionModelType;
 use App\Traits\CommonFunctions;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use App\Models\CustodianModelConfig;
 use App\Traits\Notifications\NotificationCustodianManager;
@@ -75,6 +76,10 @@ class CustodianModelConfigController extends Controller
      */
     public function getByCustodianID(GetCustodianModelConfigByCustodian $request, int $id): JsonResponse
     {
+        if (! Gate::allows('viewByCustodian', [CustodianModelConfig::class, $id])) {
+            return $this->ForbiddenResponse();
+        }
+
         $conf = CustodianModelConfig::where('custodian_id', $id)->get();
         if (!$conf) {
             return $this->NotFoundResponse();
@@ -130,6 +135,10 @@ class CustodianModelConfigController extends Controller
     {
         try {
             $input = $request->only(app(CustodianModelConfig::class)->getFillable());
+
+            if (! Gate::allows('create', [CustodianModelConfig::class, (int) $input['custodian_id']])) {
+                return $this->ForbiddenResponse();
+            }
 
             $conf = CustodianModelConfig::firstOrCreate([
                 'decision_model_id' => $input['decision_model_id'],
@@ -217,6 +226,11 @@ class CustodianModelConfigController extends Controller
         try {
             $input = $request->only(app(CustodianModelConfig::class)->getFillable());
             $conf = CustodianModelConfig::findOrFail($id);
+
+            if (! Gate::allows('update', $conf)) {
+                return $this->ForbiddenResponse();
+            }
+
             $conf->update($input);
 
 
@@ -281,6 +295,11 @@ class CustodianModelConfigController extends Controller
     {
         try {
             $conf = CustodianModelConfig::where('id', $id)->first();
+
+            if (! Gate::allows('delete', $conf)) {
+                return $this->ForbiddenResponse();
+            }
+
             $conf->update([
                 'active' => 0,
             ]);
@@ -354,6 +373,10 @@ class CustodianModelConfigController extends Controller
      */
     public function getDecisionModels(GetDecisionModelsRequest $request, int $custodianId): JsonResponse
     {
+        if (! Gate::allows('viewByCustodian', [CustodianModelConfig::class, $custodianId])) {
+            return $this->ForbiddenResponse();
+        }
+
         $decisionModelType = $request->input('decision_model_type');
 
         $decisionModelTypeId = DecisionModelType::where('name', $decisionModelType)->value('id');
@@ -449,6 +472,10 @@ class CustodianModelConfigController extends Controller
     public function updateDecisionModels(UpdateDecisionModelsRequest $request, int $id): JsonResponse
     {
         try {
+            if (! Gate::allows('updateByCustodian', [CustodianModelConfig::class, $id])) {
+                return $this->ForbiddenResponse();
+            }
+
             $loggedInUserId = $request->user()?->id;
             $request->validate([
                 'configs' => 'required|array',
