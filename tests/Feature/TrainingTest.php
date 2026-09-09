@@ -64,6 +64,19 @@ class TrainingTest extends TestCase
         $this->assertEquals('Invalid argument(s)', $message);
     }
 
+    public function test_the_application_cannot_list_training_by_registry_id_they_dont_own(): void
+    {
+        $otherRegistry = Registry::where('id', '!=', $this->user->registry_id)->first();
+
+        $response = $this->actingAs($this->user)
+            ->json(
+                'GET',
+                self::TEST_URL . "/registry/{$otherRegistry->id}"
+            );
+
+        $response->assertStatus(403);
+    }
+
     public function test_the_application_cannot_list_training_linked_to_file(): void
     {
         $latestTraining = Training::query()->orderBy('id', 'desc')->first();
