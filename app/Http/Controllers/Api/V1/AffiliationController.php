@@ -87,6 +87,10 @@ class AffiliationController extends Controller
      */
     public function indexByRegistryId(GetAffiliationByRegistry $request, int $registryId): JsonResponse
     {
+        if (!Gate::allows('viewByRegistry', [Affiliation::class, $registryId])) {
+            return $this->ForbiddenResponse();
+        }
+
         $loggedInUserId = $request->user()?->id;
         $loggedInUser = User::where('id', $loggedInUserId)->first();
         $isUserGroupOrg = (!is_null($loggedInUser) && $loggedInUser->user_group === 'ORGANISATIONS') ? true : false;
@@ -191,6 +195,10 @@ class AffiliationController extends Controller
      */
     public function getOrganisationAffiliation(GetOrganisationAffiliation $request, int $registryId, int $organisationId): JsonResponse
     {
+        if (!Gate::allows('viewByRegistry', [Affiliation::class, $registryId])) {
+            return $this->ForbiddenResponse();
+        }
+
         $affiliation = Affiliation::with(
             [
                 'modelState.state',
@@ -282,6 +290,10 @@ class AffiliationController extends Controller
      */
     public function storeByRegistryId(CreateAffiliationByRegistry $request, int $registryId): JsonResponse
     {
+        if (!Gate::allows('createForRegistry', [Affiliation::class, $registryId])) {
+            return $this->ForbiddenResponse();
+        }
+
         try {
             $input = $request->only(app(Affiliation::class)->getFillable());
             $user =  $request->user;
@@ -358,7 +370,7 @@ class AffiliationController extends Controller
                 return $this->BadRequestResponse();
             }
 
-            if (!Gate::allows('userAffiliations', $affiliation)) {
+            if (!Gate::allows('manage', $affiliation)) {
                 return $this->ForbiddenResponse();
             }
 
@@ -454,7 +466,7 @@ class AffiliationController extends Controller
             $input = $request->only(app(Affiliation::class)->getFillable());
             $affiliation = Affiliation::findOrFail($id);
 
-            if (!Gate::allows('userAffiliations', $affiliation)) {
+            if (!Gate::allows('manage', $affiliation)) {
                 return $this->ForbiddenResponse();
             }
             $isCurrentEmail = (strtolower($input['email'] ?? '') === strtolower($request->user()->email));
@@ -698,6 +710,10 @@ class AffiliationController extends Controller
 
             $affiliation = Affiliation::where('id', $id)->first();
 
+            if (!Gate::allows('manage', $affiliation)) {
+                return $this->ForbiddenResponse();
+            }
+
             $causer = null;
             if ($loggedUser->user_group === User::GROUP_USERS) {
                 $causer = $loggedUser;
@@ -750,6 +766,10 @@ class AffiliationController extends Controller
             )->first();
             if (!$affiliation) {
                 return $this->NotFoundResponse();
+            }
+
+            if (!Gate::allows('approve', $affiliation)) {
+                return $this->ForbiddenResponse();
             }
 
             if ((!$affiliation->is_verified && $affiliation->current_employer && $status === 'approved') && ((int)$loggedUserOrgId !== (int)$affiliation->organisation_id)) {
