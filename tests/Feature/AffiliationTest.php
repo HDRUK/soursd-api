@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use Carbon\Carbon;
 use Tests\TestCase;
-use App\Models\User;
 use App\Models\Registry;
 use App\Models\Affiliation;
 use App\Models\Organisation;
@@ -29,7 +28,7 @@ class AffiliationTest extends TestCase
 
     public function test_the_application_can_show_affiliations_by_registry_id(): void
     {
-        $response = $this->actingAsKeycloakUser($this->user, $this->getMockedKeycloakPayload())
+        $response = $this->actingAs($this->user)
             ->json(
                 'GET',
                 self::TEST_URL . '/1'
@@ -57,7 +56,7 @@ class AffiliationTest extends TestCase
 
     public function test_the_application_can_show_organisation_affiliation(): void
     {
-        $response = $this->actingAsKeycloakUser($this->user, $this->getMockedKeycloakPayload())
+        $response = $this->actingAs($this->user)
             ->json(
                 'GET',
                 self::TEST_URL . '/1/organisation/1'
@@ -88,7 +87,7 @@ class AffiliationTest extends TestCase
 
     public function test_the_application_can_create_an_affiliation_by_registry_id(): void
     {
-        $response = $this->actingAsKeycloakUser($this->user, $this->getMockedKeycloakPayload())
+        $response = $this->actingAs($this->user)
             ->json(
                 'POST',
                 self::TEST_URL . '/1',
@@ -166,13 +165,7 @@ class AffiliationTest extends TestCase
 
     public function test_the_application_can_update_an_affiliation(): void
     {
-
-        Gate::shouldReceive('allows')
-             ->andReturn(true);
-
-        $user = User::find(1);
-
-        $response = $this->actingAs($user)
+        $response = $this->actingAs($this->user)
             ->json(
                 'PUT',
                 self::TEST_URL . '/1',
@@ -210,11 +203,28 @@ class AffiliationTest extends TestCase
         $this->assertEquals('Invalid argument(s)', $message);
     }
 
+    public function test_the_application_cannot_update_an_affiliation_they_dont_own(): void
+    {
+        $otherAffiliation = Affiliation::where('registry_id', '!=', $this->user->registry_id)->first();
+
+        $response = $this->actingAsKeycloakUser($this->user, $this->getMockedKeycloakPayload())
+            ->json(
+                'PUT',
+                self::TEST_URL . "/{$otherAffiliation->id}",
+                [
+                    'member_id' => 'A1234567',
+                    'organisation_id' => $otherAffiliation->organisation_id,
+                    'current_employer' => 1,
+                    'relationship' => 'employee'
+                ]
+            );
+
+        $response->assertStatus(403);
+    }
+
     public function test_the_application_can_delete_an_affiliation(): void
     {
-        $user = User::find(1);
-
-        $response = $this->actingAs($user)
+        $response = $this->actingAs($this->user)
             ->json(
                 'DELETE',
                 self::TEST_URL . '/1'
@@ -237,6 +247,30 @@ class AffiliationTest extends TestCase
         $response->assertStatus(400);
         $message = $response->decodeResponseJson()['message'];
         $this->assertEquals('Invalid argument(s)', $message);
+    }
+
+    public function test_the_application_cannot_delete_an_affiliation_they_dont_own(): void
+    {
+        $otherAffiliation = Affiliation::where('registry_id', '!=', $this->user->registry_id)->first();
+
+        $response = $this->actingAs($this->user)
+            ->json(
+                'DELETE',
+                self::TEST_URL . "/{$otherAffiliation->id}"
+            );
+
+        $response->assertStatus(403);
+    }
+
+    public function test_the_application_cannot_update_registry_affiliations_when_not_the_employing_organisation(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->json(
+                'PUT',
+                self::TEST_URL . '/1/affiliation/1?status=approved'
+            );
+
+        $response->assertStatus(403);
     }
 
     public function test_the_application_can_update_registry_affiliations(): void

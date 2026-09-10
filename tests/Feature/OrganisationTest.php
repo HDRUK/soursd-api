@@ -1385,6 +1385,44 @@ class OrganisationTest extends TestCase
         $this->assertEquals('Invalid argument(s)', $message);
     }
 
+    public function test_the_application_cannot_update_organisations_they_dont_own(): void
+    {
+        $otherOrganisation = Organisation::where('id', '!=', $this->organisation_admin->organisation_id)->first();
+
+        $response = $this->actingAs($this->organisation_admin)
+            ->json(
+                'PUT',
+                self::TEST_URL . "/{$otherOrganisation->id}",
+                [
+                    'organisation_name' => 'Test Organisation',
+                    'address_1' => '123 Blah blah',
+                    'address_2' => '',
+                    'town' => 'Town',
+                    'county' => 'County',
+                    'country' => 'Country',
+                    'postcode' => 'BLA4 4HH',
+                    'lead_applicant_organisation_name' => 'Some One',
+                    'lead_applicant_email' => fake()->email(),
+                    'organisation_unique_id' => Str::random(40),
+                    'applicant_names' => 'Some One, Some Two, Some Three',
+                    'funders_and_sponsors' => 'UKRI, MRC',
+                    'sub_license_arrangements' => 'N/A',
+                    'verified' => true,
+                    'companies_house_no' => '10887014',
+                    'sector_id' => fake()->randomElement([0, count(Sector::SECTORS)]),
+                    'charities' => [
+                        'registration_id' => '1186569',
+                    ],
+                    'ror_id' => '02wnqcb97',
+                    'smb_status' => false,
+                    'organisation_size' => 2,
+                    'website' => 'https://www.website.com/',
+                ]
+            );
+
+        $response->assertStatus(403);
+    }
+
     public function test_the_org_admin_cannot_update_organisations_approved(): void
     {
         $latestOrganisation = Organisation::query()->orderBy('id', 'desc')->first();
