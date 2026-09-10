@@ -36,7 +36,7 @@ class REG2496_20260817_RemoveDuplicatedCustodianModelConfigs extends Command
 
             $uniqueData = \DB::select("
                 WITH cte AS (
-                    SELECT *, ROW_NUMBER() OVER (PARTITION BY custodian_id, entity_model_id ORDER BY id) rn
+                    SELECT *, ROW_NUMBER() OVER (PARTITION BY custodian_id, decision_model_id ORDER BY id) rn
                     FROM custodian_model_configs
                 )
                 SELECT id
