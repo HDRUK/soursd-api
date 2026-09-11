@@ -1,3 +1,27 @@
+## [1.36.0](https://github.com/HDRUK/safepeopleregistry-api/compare/v1.35.0...v1.36.0) (2026-09-11)
+
+### ✨ Features
+
+* **REGISTRY-000:** Implement deployment-step mechanism exactly as in Gateway (#781) ([e18228e](https://github.com/HDRUK/safepeopleregistry-api/commit/e18228e9079be030fdad865718e1a842131b385a))
+* **REGISTRY-000:** remove EntityModels (#783) ([6f2da4c](https://github.com/HDRUK/safepeopleregistry-api/commit/6f2da4c5e257bd52553413675724a5489a00091a))
+* **REGISTRY-000:** Rename CustodianModelConfig.entity_model_id to decision_model_id (#785) ([23d6802](https://github.com/HDRUK/safepeopleregistry-api/commit/23d6802d7ed4214e22fbfdbf314d4e639c790a3b))
+* **REGISTRY-000:** Rename entity_model_type to decision_model_type (#786) ([38586ee](https://github.com/HDRUK/safepeopleregistry-api/commit/38586eea6aab0b29e6efc86669aad9eed51c64ea))
+* **REGISTRY-2745:** Add policy/gating to CustodianModelConfigController (#793) ([d9a4b0d](https://github.com/HDRUK/safepeopleregistry-api/commit/d9a4b0df969fdc2ba42bfb62dbcf3f2a5265f8f4))
+* **REGISTRY-2906:** Capture the first name and last name from the IDVT document (#784) ([6c72baf](https://github.com/HDRUK/safepeopleregistry-api/commit/6c72baf8c7527139a1bc26b8877d6bafc906b06b))
+* **REGISTRY-2913:** Enables SSO for gateway (#787) ([24be564](https://github.com/HDRUK/safepeopleregistry-api/commit/24be5645d7f1fdafde588df347b1513cdeb27e10))
+* **REGISTRY-2917:** Adds SAML SSO to Registry (#788) ([f492b2d](https://github.com/HDRUK/safepeopleregistry-api/commit/f492b2d9f7285a2616045832a824b0b341a90b2d))
+* **REGISTRY-2918:** Implements account linking via social providers (#789) ([6913f98](https://github.com/HDRUK/safepeopleregistry-api/commit/6913f989136e6b41174de8c1195388a33b71298c))
+
+### 🐛 Bug Fixes
+
+* **REGISTRY-2281:** Fix delegate contact rule  (#782) ([4f15abd](https://github.com/HDRUK/safepeopleregistry-api/commit/4f15abd8f4a4e80702f7c7447460cceaf7ca9080))
+* **REGISTRY-2281:** Security compliance flags for Orgs (#791) ([ff2a238](https://github.com/HDRUK/safepeopleregistry-api/commit/ff2a238c26d2cb487606472ba1dea471f26a8786))
+* **REGISTRY-2496:** Automated flags config not reflected (#780) ([339acdf](https://github.com/HDRUK/safepeopleregistry-api/commit/339acdf73bdf79e4ea6b20d7a50a5dcb152e03e1))
+* **REGISTRY-2743:** Fix SRO Declaration Form upload notification bug (#795) ([f54b3dd](https://github.com/HDRUK/safepeopleregistry-api/commit/f54b3dd517b50886b1de74716c3af73591e1fb67))
+* **REGISTRY-2756:** CustodianUsers: Fix permissions via policy (#792) ([29d8c66](https://github.com/HDRUK/safepeopleregistry-api/commit/29d8c66e1d1c9c89edfe5d5367130946d3775108))
+* **REGISTRY-2842:** Update Organisation home actions page for the Delegate view (#790) ([89051f2](https://github.com/HDRUK/safepeopleregistry-api/commit/89051f2234a4e0c6329fbd16b6618eed64007f7e))
+* **REGISTRY-2946:** Fix tests that incorrectly use nonexistent ids (#794) ([10038e7](https://github.com/HDRUK/safepeopleregistry-api/commit/10038e757fe0fb28950922ddbb349faad5ea9582))
+
 ## [1.35.0](https://github.com/HDRUK/safepeopleregistry-api/compare/v1.34.0...v1.35.0) (2026-08-18)
 
 ### ✨ Features
