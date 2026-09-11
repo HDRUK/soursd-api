@@ -126,6 +126,8 @@ class VeriffTranslator implements WebhookTranslationInterface
                 'idvt_document_number' => $data['verification']['document']['number'] ?? null,
                 'idvt_document_country' => $data['verification']['document']['country'] ?? null,
                 'idvt_document_valid_until' => $data['verification']['document']['validUntil'] ?? null,
+                'idvt_document_first_name' => $data['verification']['person']['firstName'] ?? null,
+                'idvt_document_last_name' => $data['verification']['person']['lastName'] ?? null,
                 'idvt_attempt_id' => $data['verification']['attemptId'] ?? null,
                 'idvt_context_id' => $data['verification']['id'] ?? null,
                 'idvt_document_dob' => $data['verification']['person']['dateOfBirth'] ?? null,

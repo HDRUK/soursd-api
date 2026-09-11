@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\Custodian;
 use App\Models\DecisionModel;
-use App\Models\EntityModelType;
+use App\Models\DecisionModelType;
 use Illuminate\Console\Command;
 use App\Models\DecisionModelLog;
 use App\Models\CustodianHasProjectOrganisation;
@@ -24,8 +24,8 @@ class CheckingOrganisationAutomatedFlagsTest extends TestCase
                         ->pluck('id')
                         ->toArray();
 
-        $entityModelTypes = EntityModelType::where('name', EntityModelType::ORG_VALIDATION_RULES)->first();
-        $countDecisionModel = DecisionModel::where('entity_model_type_id', $entityModelTypes->id)->count();
+        $decisionModelTypes = DecisionModelType::where('name', DecisionModelType::ORG_VALIDATION_RULES)->first();
+        $countDecisionModel = DecisionModel::where('decision_model_type_id', $decisionModelTypes->id)->count();
 
         $countExpected = 0;
         foreach ($custIds as $custId) {

@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Exception;
 use App\Models\User;
 use App\Models\Custodian;
-use App\Models\EntityModelType;
+use App\Models\DecisionModelType;
 use Illuminate\Console\Command;
 use App\Models\CustodianHasProjectUser;
 use App\Models\DecisionModelLog;
@@ -80,7 +80,7 @@ class CheckingUserAutomatedFlags extends Command
 
     public function checkUserById(int $cId, int $uId)
     {
-        $this->decisionEvaluator = new DecisionEvaluatorService([EntityModelType::USER_VALIDATION_RULES], $cId);
+        $this->decisionEvaluator = new DecisionEvaluatorService([DecisionModelType::USER_VALIDATION_RULES], $cId);
 
         $user = User::with([
                     'permissions',

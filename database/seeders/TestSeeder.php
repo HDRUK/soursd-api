@@ -47,11 +47,15 @@ class TestSeeder extends Seeder
             $decisionModels = DecisionModel::all();
 
             foreach ($decisionModels as $d) {
-                CustodianModelConfig::create([
-                    'entity_model_id' => $d->id,
-                    'active' => 1,
+                CustodianModelConfig::firstOrCreate(
+                    [
+                    'decision_model_id' => $d->id,
                     'custodian_id' => $i->id,
-                ]);
+                ],
+                    [
+                    'active' => 1,
+                ]
+                );
             }
 
             $iu = CustodianUser::create([
@@ -108,9 +112,6 @@ class TestSeeder extends Seeder
             'sub_license_arrangements' => '...',
             'verified' => false,
             'dsptk_ods_code' => '',
-            'iso_27001_certified' => false,
-            'ce_certified' => false,
-            'ce_plus_certified' => false,
             'companies_house_no' => '012345678',
             'sector_id' => 6, // Private/Industry
             'ror_id' => null,

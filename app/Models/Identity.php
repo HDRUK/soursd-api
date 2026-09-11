@@ -105,6 +105,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *         description="Validity date of the document used for IDVT"
  *     ),
  *     @OA\Property(
+ *         property="idvt_document_first_name",
+ *         type="string",
+ *         example="Joe",
+ *         description="First name on the document used for IDVT"
+ *     ),
+ *     @OA\Property(
+ *         property="idvt_document_valid_last_name",
+ *         type="string",
+ *         example="Bloggs",
+ *         description="Last name on the document used for IDVT"
+ *     ),
+ *     @OA\Property(
  *         property="idvt_attempt_id",
  *         type="string",
  *         example="ATT12345",
@@ -193,6 +205,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $idvt_document_number
  * @property string|null $idvt_document_country
  * @property string|null $idvt_document_valid_until
+ * @property string|null $idvt_document_first_name
+ * @property string|null $idvt_document_last_name
  * @property string|null $idvt_attempt_id
  * @property string|null $idvt_context_id
  * @property string|null $idvt_document_dob
@@ -219,6 +233,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Identity whereIdvtDocumentNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Identity whereIdvtDocumentType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Identity whereIdvtDocumentValidUntil($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Identity whereIdvtDocumentFirstName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Identity whereIdvtDocumentLastName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Identity whereIdvtIdentificationNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Identity whereIdvtResultText($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Identity whereIdvtStartedAt($value)
@@ -255,6 +271,8 @@ class Identity extends Model
         'idvt_document_number',
         'idvt_document_country',
         'idvt_document_valid_until',
+        'idvt_document_first_name',
+        'idvt_document_last_name',
         'idvt_attempt_id',
         'idvt_context_id',
         'idvt_document_dob',

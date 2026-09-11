@@ -7,14 +7,15 @@ use App\Models\Custodian;
 use Illuminate\Http\Request;
 use App\Models\DecisionModel;
 use App\Http\Traits\Responses;
-use App\Models\EntityModelType;
+use App\Models\DecisionModelType;
 use App\Traits\CommonFunctions;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use App\Models\CustodianModelConfig;
 use App\Traits\Notifications\NotificationCustodianManager;
-use App\Http\Requests\CustodianModelConfig\GetEntityModelsRequest;
-use App\Http\Requests\CustodianModelConfig\UpdateEntityModelsRequest;
+use App\Http\Requests\CustodianModelConfig\GetDecisionModelsRequest;
+use App\Http\Requests\CustodianModelConfig\UpdateDecisionModelsRequest;
 use App\Http\Requests\CustodianModelConfig\DeleteCustodianModelConfig;
 use App\Http\Requests\CustodianModelConfig\CreateCustodianModelConfigRequest;
 use App\Http\Requests\CustodianModelConfig\UpdateCustodianModelConfigRequest;
@@ -75,6 +76,10 @@ class CustodianModelConfigController extends Controller
      */
     public function getByCustodianID(GetCustodianModelConfigByCustodian $request, int $id): JsonResponse
     {
+        if (! Gate::allows('viewByCustodian', [CustodianModelConfig::class, $id])) {
+            return $this->ForbiddenResponse();
+        }
+
         $conf = CustodianModelConfig::where('custodian_id', $id)->get();
         if (!$conf) {
             return $this->NotFoundResponse();
@@ -131,10 +136,15 @@ class CustodianModelConfigController extends Controller
         try {
             $input = $request->only(app(CustodianModelConfig::class)->getFillable());
 
-            $conf = CustodianModelConfig::create([
-                'entity_model_id' => $input['entity_model_id'],
-                'active' => $input['active'],
+            if (! Gate::allows('create', [CustodianModelConfig::class, (int) $input['custodian_id']])) {
+                return $this->ForbiddenResponse();
+            }
+
+            $conf = CustodianModelConfig::firstOrCreate([
+                'decision_model_id' => $input['decision_model_id'],
                 'custodian_id' => $input['custodian_id'],
+            ], [
+                'active' => $input['active'],
             ]);
 
             return $this->CreatedResponse($conf->id);
@@ -216,6 +226,11 @@ class CustodianModelConfigController extends Controller
         try {
             $input = $request->only(app(CustodianModelConfig::class)->getFillable());
             $conf = CustodianModelConfig::findOrFail($id);
+
+            if (! Gate::allows('update', $conf)) {
+                return $this->ForbiddenResponse();
+            }
+
             $conf->update($input);
 
 
@@ -280,6 +295,11 @@ class CustodianModelConfigController extends Controller
     {
         try {
             $conf = CustodianModelConfig::where('id', $id)->first();
+
+            if (! Gate::allows('delete', $conf)) {
+                return $this->ForbiddenResponse();
+            }
+
             $conf->update([
                 'active' => 0,
             ]);
@@ -291,11 +311,11 @@ class CustodianModelConfigController extends Controller
     }
     /**
      * @OA\Get(
-     *      path="/api/v1/custodian_config/{custodianId}/entity_models",
-     *      operationId="custodianModelConfigGetEntityModels",
+     *      path="/api/v1/custodian_config/{custodianId}/decision_models",
+     *      operationId="custodianModelConfigGetDecisionModels",
      *      x={"internal"="true"},
-     *      summary="Get entity models for custodian config",
-     *      description="Retrieve entity models associated with custodian config based on the specified entity_model_type",
+     *      summary="Get decision models for custodian config",
+     *      description="Retrieve decision models associated with custodian config based on the specified decision_model_type",
      *      tags={"CustodianModelConfig"},
      *      security={{"bearerAuth":{}}},
      *      @OA\Parameter(
@@ -306,10 +326,10 @@ class CustodianModelConfigController extends Controller
      *          @OA\Schema(type="integer")
      *      ),
      *      @OA\Parameter(
-     *          name="entity_model_type",
+     *          name="decision_model_type",
      *          in="query",
      *          required=true,
-     *          description="Type of entity model to retrieve",
+     *          description="Type of decision model to retrieve",
      *          @OA\Schema(
      *              type="string",
      *              enum={"decision_model", "user_validation_rules", "org_validation_rules"}
@@ -325,7 +345,7 @@ class CustodianModelConfigController extends Controller
      *                      type="object",
      *                      @OA\Property(property="id", type="integer", example=1),
      *                      @OA\Property(property="name", type="string", example="Decision Model A"),
-     *                      @OA\Property(property="entity_model_type_id", type="integer", example=1),
+     *                      @OA\Property(property="decision_model_type_id", type="integer", example=1),
      *                      @OA\Property(property="description", type="string", nullable=true, example="This is a decision model for process A"),
      *                      @OA\Property(property="created_at", type="string", format="date-time"),
      *                      @OA\Property(property="updated_at", type="string", format="date-time"),
@@ -346,35 +366,39 @@ class CustodianModelConfigController extends Controller
      *          response=404,
      *          description="Not found response",
      *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="No entity models found")
+     *              @OA\Property(property="message", type="string", example="No decision models found")
      *          )
      *      )
      * )
      */
-    public function getEntityModels(GetEntityModelsRequest $request, int $custodianId): JsonResponse
+    public function getDecisionModels(GetDecisionModelsRequest $request, int $custodianId): JsonResponse
     {
-        $entityModelType = $request->input('entity_model_type');
+        if (! Gate::allows('viewByCustodian', [CustodianModelConfig::class, $custodianId])) {
+            return $this->ForbiddenResponse();
+        }
 
-        $entityModelTypeId = EntityModelType::where('name', $entityModelType)->value('id');
+        $decisionModelType = $request->input('decision_model_type');
 
-        if (!$entityModelTypeId) {
+        $decisionModelTypeId = DecisionModelType::where('name', $decisionModelType)->value('id');
+
+        if (!$decisionModelTypeId) {
             return $this->NotFoundResponse();
         }
 
-        $entityModels = DecisionModel::with(['custodianModelConfig' => function ($query) use ($custodianId) {
+        $decisionModels = DecisionModel::with(['custodianModelConfig' => function ($query) use ($custodianId) {
             $query->where('custodian_id', $custodianId);
         }])
             ->whereHas('custodianModelConfig', function ($query) use ($custodianId) {
                 $query->where('custodian_id', $custodianId);
             })
-            ->where('entity_model_type_id', $entityModelTypeId)
+            ->where('decision_model_type_id', $decisionModelTypeId)
             ->get();
 
-        if ($entityModels->isEmpty()) {
+        if ($decisionModels->isEmpty()) {
             return $this->NotFoundResponse();
         }
 
-        $entityModels = $entityModels->map(function ($model) {
+        $decisionModels = $decisionModels->map(function ($model) {
             return [
                 'id' => $model->id,
                 'name' => $model->name,
@@ -383,14 +407,14 @@ class CustodianModelConfigController extends Controller
             ];
         });
 
-        return $this->OKResponse($entityModels);
+        return $this->OKResponse($decisionModels);
     }
     /**
      * @OA\Put(
-     *      path="/api/v1/custodian_config/{custodianId}/entity_models",
-     *      operationId="custodianModelConfigUpdateEntityModels",
+     *      path="/api/v1/custodian_config/{custodianId}/decision_models",
+     *      operationId="custodianModelConfigUpdateDecisionModels",
      *      x={"internal"="true"},
-     *      summary="Update a custodian's entity models",
+     *      summary="Update a custodian's decision models",
      *      description="Update the active status of specified custodian model configs for a given custodian",
      *      tags={"CustodianModelConfig"},
      *      security={{"bearerAuth":{}}},
@@ -409,7 +433,7 @@ class CustodianModelConfigController extends Controller
      *                  type="array",
      *                  @OA\Items(
      *                      type="object",
-     *                      @OA\Property(property="entity_model_id", type="integer", example=1),
+     *                      @OA\Property(property="decision_model_id", type="integer", example=1),
      *                      @OA\Property(property="active", type="boolean", example=true)
      *                  )
      *              )
@@ -423,7 +447,7 @@ class CustodianModelConfigController extends Controller
      *              @OA\Property(property="data", type="array",
      *                  @OA\Items(
      *                      type="object",
-     *                      @OA\Property(property="entity_model_id", type="integer", example=1),
+     *                      @OA\Property(property="decision_model_id", type="integer", example=1),
      *                      @OA\Property(property="active", type="boolean", example=true)
      *                  )
      *              )
@@ -440,18 +464,22 @@ class CustodianModelConfigController extends Controller
      *          response=404,
      *          description="Not Found",
      *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Custodian or one or more entity models not found")
+     *              @OA\Property(property="message", type="string", example="Custodian or one or more decision models not found")
      *          )
      *      )
      * )
      */
-    public function updateEntityModels(UpdateEntityModelsRequest $request, int $id): JsonResponse
+    public function updateDecisionModels(UpdateDecisionModelsRequest $request, int $id): JsonResponse
     {
         try {
+            if (! Gate::allows('updateByCustodian', [CustodianModelConfig::class, $id])) {
+                return $this->ForbiddenResponse();
+            }
+
             $loggedInUserId = $request->user()?->id;
             $request->validate([
                 'configs' => 'required|array',
-                'configs.*.entity_model_id' => 'required|integer|exists:decision_models,id',
+                'configs.*.decision_model_id' => 'required|integer|exists:decision_models,id',
                 'configs.*.active' => 'required|boolean',
             ]);
 
@@ -461,7 +489,7 @@ class CustodianModelConfigController extends Controller
 
             foreach ($configs as $config) {
                 $custodianModelConfig = CustodianModelConfig::where('custodian_id', $id)
-                    ->where('entity_model_id', $config['entity_model_id'])
+                    ->where('decision_model_id', $config['decision_model_id'])
                     ->first();
 
                 if ($custodianModelConfig) {
@@ -472,7 +500,7 @@ class CustodianModelConfigController extends Controller
                     $custodianModelConfig->save();
 
                     $updatedConfigs[] = [
-                        'entity_model_id' => $custodianModelConfig->entity_model_id,
+                        'decision_model_id' => $custodianModelConfig->decision_model_id,
                         'active' => $custodianModelConfig->active,
                     ];
                 }

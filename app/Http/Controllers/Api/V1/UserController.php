@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use App\Models\PendingInvite;
 use Illuminate\Http\Response;
 use App\Http\Traits\Responses;
-use App\Models\EntityModelType;
+use App\Models\DecisionModelType;
 use App\Traits\CommonFunctions;
 use Tests\Traits\Authorisation;
 use App\Traits\CheckPermissions;
@@ -105,7 +105,7 @@ class UserController extends Controller
         if (!Gate::allows('viewAny', User::class)) {
             return $this->ForbiddenResponse();
         }
-        $this->decisionEvaluator = new DES([EntityModelType::USER_VALIDATION_RULES]);
+        $this->decisionEvaluator = new DES([DecisionModelType::USER_VALIDATION_RULES]);
 
         $users = User::searchViaRequest()
             ->filterByState()
@@ -243,7 +243,7 @@ class UserController extends Controller
     public function show(GetUser $request, int $id): JsonResponse
     {
         try {
-            $this->decisionEvaluator = new DES([EntityModelType::USER_VALIDATION_RULES]);
+            $this->decisionEvaluator = new DES([DecisionModelType::USER_VALIDATION_RULES]);
 
             $loggedInUserId = $request->user()->id;
             $loggedInUser = User::where('id', $loggedInUserId)->first();

@@ -3,10 +3,10 @@
 namespace App\Http\Requests\CustodianModelConfig;
 
 use App\Http\Requests\BaseFormRequest;
-use App\Models\EntityModelType;
+use App\Models\DecisionModelType;
 use Illuminate\Validation\Rule;
 
-class GetEntityModelsRequest extends BaseFormRequest
+class GetDecisionModelsRequest extends BaseFormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -21,10 +21,10 @@ class GetEntityModelsRequest extends BaseFormRequest
                 'integer',
                 'exists:custodians,id',
             ],
-            'entity_model_type' => [
+            'decision_model_type' => [
                 'required',
                 'string',
-                Rule::in(EntityModelType::ENTITY_TYPES),
+                Rule::in(DecisionModelType::ENTITY_TYPES),
             ],
         ];
     }

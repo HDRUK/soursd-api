@@ -33,6 +33,8 @@ class IdentityFactory extends Factory
             'idvt_document_number' => null,
             'idvt_document_country' => null,
             'idvt_document_valid_until' => null,
+            'idvt_document_first_name' => null,
+            'idvt_document_last_name' => null,
             'idvt_attempt_id' => null,
             'idvt_context_id' => null,
             'idvt_document_dob' => null,

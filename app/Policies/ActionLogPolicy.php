@@ -26,7 +26,7 @@ class ActionLogPolicy
                 return $user->id === $entityId;
 
             case Organisation::class:
-                return  $user->is_delegate === 0 && $user->organisation_id === $entityId;
+                return  $user->organisation_id === $entityId;
 
             case Custodian::class:
                 return optional($user->custodian_user)->custodian_id === $entityId;

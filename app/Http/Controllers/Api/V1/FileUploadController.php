@@ -288,6 +288,11 @@ class FileUploadController extends Controller
                     throw new Exception('Organisation not found');
                 }
 
+                OrganisationHasFile::create([
+                    'organisation_id' => $organisation->id,
+                    'file_id' => $fileIn->id,
+                ]);
+
                 if (strtolower($input['file_type']) === File::FILE_TYPE_DECLARATION_SRO && !$organisation->unclaimed) {
                     $inProgressState = State::STATE_AFFILIATION_ACCOUNT_IN_PROGRESS;
                     $inReview = State::STATE_AFFILIATION_REVIEW;
@@ -315,38 +320,32 @@ class FileUploadController extends Controller
                          $q->where('unclaimed', false)
                      )->each(fn ($affiliation) => $affiliation->setState($inReview));
 
+                    $userAdmins = User::where('user_group', User::GROUP_ADMINS)->select(['id'])->get();
+                    foreach ($userAdmins as $userAdmin) {
+
+                        TriggerEmail::spawnEmail([
+                            'type' => 'ORGANISATION_NEEDS_CONFIRMATION',
+                            'to' => $organisation->id,
+                            'by' => $userAdmin->id,
+                            'identifier' => 'organisation_confirmation_needed'
+                        ]);
+
+                    }
+
+                    $this->sendNotificationOnUploadSroDoc($organisation->id, $fileIn->id);
+
+                    activity('upload')
+                        ->causedBy(Auth::user())
+                        ->performedOn($organisation)
+                        ->withProperties([
+                            'name' => $file->getClientOriginalName(),
+                            'type' => $input['file_type'],
+                            'path' => $path,
+                        ])
+                        ->event('upload_queued')
+                        ->log('Upload SRO Declaration Form');
 
                 }
-
-                OrganisationHasFile::create([
-                    'organisation_id' => $organisation->id,
-                    'file_id' => $fileIn->id,
-                ]);
-
-                $userAdmins = User::where('user_group', User::GROUP_ADMINS)->select(['id'])->get();
-                foreach ($userAdmins as $userAdmin) {
-
-                    TriggerEmail::spawnEmail([
-                        'type' => 'ORGANISATION_NEEDS_CONFIRMATION',
-                        'to' => $organisation->id,
-                        'by' => $userAdmin->id,
-                        'identifier' => 'organisation_confirmation_needed'
-                    ]);
-
-                }
-
-                $this->sendNotificationOnUploadSroDoc($organisation->id, $fileIn->id);
-
-                activity('upload')
-                    ->causedBy(Auth::user())
-                    ->performedOn($organisation)
-                    ->withProperties([
-                        'name' => $file->getClientOriginalName(),
-                        'type' => $input['file_type'],
-                        'path' => $path,
-                    ])
-                    ->event('upload_queued')
-                    ->log('Upload SRO Declaration Form');
             } else {
                 throw new Exception('Invalid or missing registry ID or organisation ID');
             }

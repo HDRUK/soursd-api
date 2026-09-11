@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Exception;
 use App\Models\Custodian;
 use App\Models\Organisation;
-use App\Models\EntityModelType;
+use App\Models\DecisionModelType;
 use Illuminate\Console\Command;
 use App\Models\DecisionModelLog;
 use App\Services\DecisionEvaluatorService;
@@ -78,7 +78,7 @@ class CheckingOrganisationAutomatedFlags extends Command
 
     public function checkOrganisationById(int $cId, int $oId)
     {
-        $this->decisionEvaluator = new DecisionEvaluatorService([EntityModelType::ORG_VALIDATION_RULES], $cId);
+        $this->decisionEvaluator = new DecisionEvaluatorService([DecisionModelType::ORG_VALIDATION_RULES], $cId);
 
         $organisation = Organisation::with([
                             'departments',

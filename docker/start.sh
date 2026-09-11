@@ -42,6 +42,11 @@ else
     echo "running in prod mode"
 fi
 
+# Run pending deployment steps (run-once, forward-only data fixes/seeding).
+# Must run after migrations so the deployment_steps table and schema exist.
+echo "Running deployment steps..."
+php artisan deploy:run
+
 # Start queue worker in background WITH restart loop
 run_queue_worker &
 

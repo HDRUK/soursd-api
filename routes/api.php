@@ -8,11 +8,13 @@ use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\QueryController;
 use App\Http\Controllers\Api\V1\SectorController;
 use App\Http\Controllers\Api\V1\FeatureController;
+use App\Http\Controllers\Api\V1\HandoffCodeController;
 use App\Http\Controllers\Api\V1\HistoryController;
 use App\Http\Controllers\Api\V1\ProjectController;
 use App\Http\Controllers\Api\V1\WebhookController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\IdentityController;
+use App\Http\Controllers\Api\V1\LinkedIdentityController;
 use App\Http\Controllers\Api\V1\RegistryController;
 use App\Http\Controllers\Api\V1\TrainingController;
 use App\Http\Controllers\Api\V1\ActionLogController;
@@ -23,6 +25,7 @@ use App\Http\Controllers\Api\V1\ExperienceController;
 use App\Http\Controllers\Api\V1\FileUploadController;
 use App\Http\Controllers\Api\V1\PermissionController;
 use App\Http\Controllers\Api\V1\ResolutionController;
+use App\Http\Controllers\Api\V1\SsoTenantController;
 use App\Http\Controllers\Api\V1\SubsidiaryController;
 use App\Http\Controllers\Api\V1\AffiliationController;
 use App\Http\Controllers\Api\V1\EndorsementController;
@@ -72,6 +75,11 @@ Route::middleware('api')->get('auth/me', [AuthController::class, 'me']);
 Route::middleware('api')->get('auth/me_unclaimed', [AuthController::class, 'meUnclaimed']);
 Route::middleware('api')->post('auth/register', [AuthController::class, 'registerKeycloakUser']);
 Route::middleware('api')->post('auth/claimUser/{userId}', [AuthController::class, 'claimUser']);
+
+// Gateway SSO handoff: speedi-as-web stores claims here after completing the Keycloak
+// exchange for a Gateway-originated login; Gateway redeems the code server-to-server.
+Route::middleware('api')->post('auth/gateway_handoff', [HandoffCodeController::class, 'store']);
+Route::middleware('verify.gateway.signature')->post('auth/gateway_handoff/{code}/redeem', [HandoffCodeController::class, 'redeem']);
 
 // --- USERS ---
 Route::middleware(['auth:api'])
@@ -256,6 +264,28 @@ Route::middleware(['auth:api'])
         Route::delete('/{id}', 'destroy');
     });
 
+// --- SSO TENANTS (enterprise SAML onboarding) ---
+Route::middleware(['auth:api', 'feature:EnterpriseSAMLSSOEnabled'])
+    ->prefix('v1/sso_tenants')
+    ->controller(SsoTenantController::class)
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{id}', 'show');
+        Route::post('/', 'store');
+        Route::put('/{id}', 'update');
+        Route::post('/{id}/approve', 'approve');
+        Route::post('/{id}/reject', 'reject');
+        Route::post('/{id}/reimport', 'reimportMetadata');
+        Route::post('/{id}/enable', 'enable');
+        Route::delete('/{id}', 'destroy');
+        Route::delete('/{id}/purge', 'purge');
+    });
+
+// Unauthenticated - runs before the user has a session, so it can't sit
+// behind auth:api. Throttled since it's a domain-existence oracle otherwise.
+Route::middleware(['throttle:30,1', 'feature:EnterpriseSAMLSSOEnabled'])
+    ->post('v1/sso/lookup', [SsoTenantController::class, 'lookupDomain']);
+
 
 // --- CUSTODIAN USERS ---
 Route::middleware('auth:api')
@@ -360,6 +390,16 @@ Route::middleware('auth:api')
         Route::post('/', 'store');
         Route::put('{id}', 'update');
         Route::delete('{id}', 'destroy');
+    });
+
+// --- LINKED IDENTITIES ---
+Route::middleware('auth:api')
+    ->prefix('v1/linked_identities')
+    ->controller(LinkedIdentityController::class)
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::post('{provider}', 'sync');
+        Route::delete('{provider}', 'unlink');
     });
 
 // --- ORGANISATIONS ---
@@ -581,8 +621,8 @@ Route::middleware('auth:api')
         Route::get('{id}', 'getByCustodianID');
         Route::put('{id}', 'update');
         Route::delete('{id}', 'destroy');
-        Route::get('{custodianId}/entity_models', 'getEntityModels');
-        Route::put('{id}/entity_models', 'updateEntityModels');
+        Route::get('{custodianId}/decision_models', 'getDecisionModels');
+        Route::put('{id}/decision_models', 'updateDecisionModels');
     });
 
 // --- PROJECT DETAILS ---

@@ -32,7 +32,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Users\UKDataProtection::class,
                 'description' => 'A User should be located in a country which adheres to equivalent data protection law.',
-                'entity_model_type_id' => 1,
+                'decision_model_type_id' => 1,
             ],
             [
                 'name' => 'Training',
@@ -43,7 +43,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Users\Training::class,
                 'description' => 'A User has completed the NHS Research Secure Data Environment training.',
-                'entity_model_type_id' => 1,
+                'decision_model_type_id' => 1,
             ],
             [
                 'name' => 'Training',
@@ -54,7 +54,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Users\Training::class,
                 'description' => 'A User has completed the ONS Accredited Researcher training.',
-                'entity_model_type_id' => 1,
+                'decision_model_type_id' => 1,
             ],
             [
                 'name' => 'Training',
@@ -65,7 +65,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Users\Training::class,
                 'description' => 'A User has completed the MRC GDPR training.',
-                'entity_model_type_id' => 1,
+                'decision_model_type_id' => 1,
             ],
             [
                 'name' => 'User affiliation',
@@ -76,7 +76,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Users\AffiliatedOrganisation::class,
                 'description' => 'A User has been affiliated by a relevant, validated Organisation.',
-                'entity_model_type_id' => 1,
+                'decision_model_type_id' => 1,
             ],
             [
                 'name' => 'Data security compliance',
@@ -87,7 +87,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Organisations\DataSecurityCompliance::class,
                 'description' => 'An Organisation has Cyber Essentials certification.',
-                'entity_model_type_id' => 1,
+                'decision_model_type_id' => 1,
             ],
             [
                 'name' => 'Data security compliance',
@@ -98,7 +98,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Organisations\DataSecurityCompliance::class,
                 'description' => 'An Organisation has Cyber Essentials Plus certification.',
-                'entity_model_type_id' => 1,
+                'decision_model_type_id' => 1,
             ],
             [
                 'name' => 'Data security compliance',
@@ -109,7 +109,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Organisations\DataSecurityCompliance::class,
                 'description' => 'An Organisation has ISO27001 certification.',
-                'entity_model_type_id' => 1,
+                'decision_model_type_id' => 1,
             ],
             [
                 'name' => 'Data security compliance',
@@ -120,7 +120,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Organisations\DataSecurityCompliance::class,
                 'description' => 'An Organisation has DSPT certification.',
-                'entity_model_type_id' => 1,
+                'decision_model_type_id' => 1,
             ],
             [
                 'name' => 'Identity',
@@ -131,7 +131,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Users\IdentityVerification::class,
                 'description' => 'A User has verified their identity via the Identity Verification Technology (IDVT).',
-                'entity_model_type_id' => 2,
+                'decision_model_type_id' => 2,
             ],
             [
                 'name' => 'User location',
@@ -142,7 +142,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Users\UKDataProtection::class,
                 'description' => 'A User is located in a country which has UK equivalent data protection laws.',
-                'entity_model_type_id' => 2,
+                'decision_model_type_id' => 2,
             ],
             [
                 'name' => 'Training',
@@ -153,7 +153,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Users\Training::class,
                 'description' => 'A User has completed the NHS Research Secure Data Environment training.',
-                'entity_model_type_id' => 2,
+                'decision_model_type_id' => 2,
             ],
             [
                 'name' => 'Training',
@@ -164,7 +164,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Users\Training::class,
                 'description' => 'A User has completed the ONS Accredited Researcher training.',
-                'entity_model_type_id' => 2,
+                'decision_model_type_id' => 2,
             ],
             [
                 'name' => 'Training',
@@ -175,7 +175,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Users\Training::class,
                 'description' => 'A User has completed the MRC GDPR training.',
-                'entity_model_type_id' => 2,
+                'decision_model_type_id' => 2,
             ],
             // TODO - Add this rule back in when the rule is implemented
             // [
@@ -187,7 +187,7 @@ class RulesSeeder extends Seeder
             //     ]),
             //     'rule_class' => \App\Rules\Users\AgreementAccepted::class, // You may need to define this
             //     'description' => 'A User has signed the NHS Research Secure Data Environment Terms of Use.',
-            //     'entity_model_type_id' => 2,
+            //     'decision_model_type_id' => 2,
             // ],
             [
                 'name' => 'User affiliation',
@@ -198,7 +198,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Users\AffiliatedOrganisation::class,
                 'description' => 'A User has been affiliated by a relevant, validated Organisation.',
-                'entity_model_type_id' => 2,
+                'decision_model_type_id' => 2,
             ],
             [
                 'name' => 'Sanctions',
@@ -213,7 +213,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Organisations\SanctionsCheck::class,
                 'description' => 'An Organisation is not on the UK sanctions list.',
-                'entity_model_type_id' => 3,
+                'decision_model_type_id' => 3,
             ],
             [
                 'name' => 'Data security compliance',
@@ -224,7 +224,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Organisations\DataSecurityCompliance::class,
                 'description' => 'An Organisation has Cyber Essentials certification.',
-                'entity_model_type_id' => 3,
+                'decision_model_type_id' => 3,
             ],
             [
                 'name' => 'Data security compliance',
@@ -235,7 +235,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Organisations\DataSecurityCompliance::class,
                 'description' => 'An Organisation has Cyber Essentials Plus certification.',
-                'entity_model_type_id' => 3,
+                'decision_model_type_id' => 3,
             ],
             [
                 'name' => 'Data security compliance',
@@ -246,7 +246,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Organisations\DataSecurityCompliance::class,
                 'description' => 'An Organisation has ISO27001 Accredited certification.',
-                'entity_model_type_id' => 3,
+                'decision_model_type_id' => 3,
             ],
             [
                 'name' => 'Data security compliance',
@@ -257,7 +257,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Organisations\DataSecurityCompliance::class,
                 'description' => 'An Organisation has either a Cyber Essentials or ISO27001 Accredited certification.',
-                'entity_model_type_id' => 3,
+                'decision_model_type_id' => 3,
             ],
             [
                 'name' => 'Data security compliance',
@@ -268,7 +268,7 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Organisations\DataSecurityCompliance::class,
                 'description' => 'An Organisation has either a Cyber Essentials Plus or ISO27001 Accredited certification.',
-                'entity_model_type_id' => 3,
+                'decision_model_type_id' => 3,
             ],
             [
                 'name' => 'Data security compliance',
@@ -279,20 +279,20 @@ class RulesSeeder extends Seeder
                 ]),
                 'rule_class' => \App\Rules\Organisations\DataSecurityCompliance::class,
                 'description' => 'An Organisation has DSPT certification.',
-                'entity_model_type_id' => 3,
+                'decision_model_type_id' => 3,
             ],
             [
                 'name' => 'Delegate/Key Contact',
                 'model_type' => \App\Models\Organisation::class,
                 'conditions' => json_encode([
-                    'path' => 'delegate_contacts',
+                    'path' => 'delegates',
                     'expects' => [
                         'minimum' => 1,
                     ],
                 ]),
                 'rule_class' => \App\Rules\Organisations\DelegateCheck::class,
                 'description' => 'An Organisation has at least one Delegate/Key Contact to affiliate Users.',
-                'entity_model_type_id' => 3,
+                'decision_model_type_id' => 3,
             ],
 
 
@@ -307,11 +307,15 @@ class RulesSeeder extends Seeder
 
         foreach ($custodians as $custodian) {
             foreach ($decisionModels as $decisionModel) {
-                CustodianModelConfig::create([
+                CustodianModelConfig::firstOrCreate(
+                    [
                     'custodian_id' => $custodian->id,
-                    'entity_model_id' => $decisionModel->id,
+                    'decision_model_id' => $decisionModel->id,
+                ],
+                    [
                     'active' => 1,
-                ]);
+                ]
+                );
             }
         }
     }

@@ -1249,11 +1249,10 @@ class CustodianController extends Controller
                 CustodianModelConfig::firstOrCreate(
                     [
                         'custodian_id' => $id,
+                        'decision_model_id' => $decisionModel->id,
                     ],
                     [
-                        'entity_model_id' => $decisionModel->id,
                         'active' => 1,
-                        'custodian_id' => $id,
                     ]
                 );
             }

@@ -2,20 +2,20 @@
 
 namespace Database\Seeders;
 
-use App\Models\EntityModelType;
+use App\Models\DecisionModelType;
 use Illuminate\Database\Seeder;
 
-class EntityModelTypeSeeder extends Seeder
+class DecisionModelTypeSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        EntityModelType::truncate();
+        DecisionModelType::truncate();
 
-        foreach (EntityModelType::ENTITY_TYPES as $type) {
-            EntityModelType::create([
+        foreach (DecisionModelType::ENTITY_TYPES as $type) {
+            DecisionModelType::create([
                 'name' => $type,
             ]);
         }

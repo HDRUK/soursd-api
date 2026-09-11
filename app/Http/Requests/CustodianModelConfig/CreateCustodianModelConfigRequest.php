@@ -14,10 +14,9 @@ class CreateCustodianModelConfigRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'entity_model_id' => [
+            'decision_model_id' => [
                 'integer',
                 'required',
-                // LS - TODO Make this param name consistent
                 'exists:decision_models,id',
             ],
             'active' => [

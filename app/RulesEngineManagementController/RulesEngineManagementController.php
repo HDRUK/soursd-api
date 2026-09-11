@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\CustodianUser;
 use App\Models\DecisionModel;
 use App\Models\CustodianModelConfig;
-use App\Models\EntityModelType;
+use App\Models\DecisionModelType;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -53,28 +53,28 @@ class RulesEngineManagementController
             return null;
         }
 
-        $entityModelTypeIds = [];
+        $decisionModelTypeIds = [];
 
         if (filled($validationType)) {
-            $entityModelTypeIds = EntityModelType::whereIn('name', $validationType)->pluck('id');
+            $decisionModelTypeIds = DecisionModelType::whereIn('name', $validationType)->pluck('id');
         } else {
-            $entityModelTypeIds = EntityModelType::whereIn('name', [
-                EntityModelType::USER_VALIDATION_RULES,
-                EntityModelType::ORG_VALIDATION_RULES
+            $decisionModelTypeIds = DecisionModelType::whereIn('name', [
+                DecisionModelType::USER_VALIDATION_RULES,
+                DecisionModelType::ORG_VALIDATION_RULES
             ])->pluck('id');
         }
 
         $modelConfig = CustodianModelConfig::where([
             'custodian_id' => $custodianId,
             'active' => 1,
-        ])->select('entity_model_id')
-        ->pluck('entity_model_id');
+        ])->select('decision_model_id')
+        ->pluck('decision_model_id');
 
         if (!$modelConfig) {
             return null;
         }
 
-        $activeModels = DecisionModel::whereIn('id', $modelConfig)->whereIn('entity_model_type_id', $entityModelTypeIds)->get();
+        $activeModels = DecisionModel::whereIn('id', $modelConfig)->whereIn('decision_model_type_id', $decisionModelTypeIds)->get();
         if (!$activeModels) {
             return null;
         }

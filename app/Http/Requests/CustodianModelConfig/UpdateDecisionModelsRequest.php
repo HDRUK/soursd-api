@@ -5,7 +5,7 @@ namespace App\Http\Requests\CustodianModelConfig;
 use App\Http\Requests\BaseFormRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateEntityModelsRequest extends BaseFormRequest
+class UpdateDecisionModelsRequest extends BaseFormRequest
 {
     /**
      * Get the validation rules that apply to the request.

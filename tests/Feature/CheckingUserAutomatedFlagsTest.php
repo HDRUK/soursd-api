@@ -6,7 +6,7 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Custodian;
 use App\Models\DecisionModel;
-use App\Models\EntityModelType;
+use App\Models\DecisionModelType;
 use Illuminate\Console\Command;
 use App\Models\DecisionModelLog;
 use App\Models\CustodianHasProjectUser;
@@ -25,8 +25,8 @@ class CheckingUserAutomatedFlagsTest extends TestCase
                         ->pluck('id')
                         ->toArray();
 
-        $entityModelTypes = EntityModelType::where('name', EntityModelType::USER_VALIDATION_RULES)->first();
-        $countDecisionModel = DecisionModel::where('entity_model_type_id', $entityModelTypes->id)->count();
+        $decisionModelTypes = DecisionModelType::where('name', DecisionModelType::USER_VALIDATION_RULES)->first();
+        $countDecisionModel = DecisionModel::where('decision_model_type_id', $decisionModelTypes->id)->count();
 
         $countExpected = 0;
         foreach ($custIds as $custId) {
@@ -96,9 +96,9 @@ class CheckingUserAutomatedFlagsTest extends TestCase
 
     public function test_application_process_user_update()
     {
-        $entityModelTypes = EntityModelType::where('name', EntityModelType::USER_VALIDATION_RULES)->first();
+        $decisionModelTypes = DecisionModelType::where('name', DecisionModelType::USER_VALIDATION_RULES)->first();
         $decisionModelLocation = DecisionModel::where([
-            'entity_model_type_id' => $entityModelTypes->id,
+            'decision_model_type_id' => $decisionModelTypes->id,
             'name' => 'User location',
         ])->first();
 

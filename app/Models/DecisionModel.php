@@ -44,10 +44,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  *         description="Description of the decision model"
  *     ),
  *     @OA\Property(
- *         property="entity_model_type_id",
+ *         property="decision_model_type_id",
  *         type="integer",
  *         example=42,
- *         description="ID of the entity model type associated with the decision"
+ *         description="ID of the decision model type associated with the decision"
  *     ),
  *     @OA\Property(
  *         property="created_at",
@@ -72,7 +72,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string $conditions
  * @property string $rule_class
  * @property string|null $description
- * @property int $entity_model_type_id
+ * @property int $decision_model_type_id
  * @property-read \App\Models\CustodianModelConfig|null $custodianModelConfig
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DecisionModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DecisionModel newQuery()
@@ -80,7 +80,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DecisionModel whereConditions($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DecisionModel whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DecisionModel whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|DecisionModel whereEntityModelTypeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DecisionModel whereDecisionModelTypeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DecisionModel whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DecisionModel whereModelType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DecisionModel whereRuleClass($value)
@@ -100,7 +100,7 @@ class DecisionModel extends Model
         'conditions',
         'rule_class',
         'description',
-        'entity_model_type_id',
+        'decision_model_type_id',
     ];
 
     /**
@@ -110,9 +110,6 @@ class DecisionModel extends Model
      */
     public function custodianModelConfig(): HasOne
     {
-        return $this->hasOne(
-            CustodianModelConfig::class,
-            'entity_model_id'
-        );
+        return $this->hasOne(CustodianModelConfig::class);
     }
 }

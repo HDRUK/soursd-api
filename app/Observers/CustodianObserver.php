@@ -13,15 +13,19 @@ class CustodianObserver
     use ValidationManager;
     public function created(Custodian $custodian): void
     {
-        // New Custodian's need all Entity models adding to their accounts
+        // New Custodian's need all Decision models adding to their accounts
         // as a default installation
         $decisionModels = DecisionModel::all();
         foreach ($decisionModels as $d) {
-            CustodianModelConfig::updateOrCreate([
-                'entity_model_id' => $d->id,
-                'active' => 1,
+            CustodianModelConfig::updateOrCreate(
+                [
+                'decision_model_id' => $d->id,
                 'custodian_id' => $custodian->id,
-            ]);
+            ],
+                [
+                'active' => 1,
+            ]
+            );
         }
 
         foreach (Custodian::getDefaultActions() as $action) {

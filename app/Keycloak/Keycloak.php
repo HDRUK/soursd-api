@@ -220,7 +220,7 @@ class Keycloak
     }
 
 
-    private static function getServiceToken(): string
+    protected static function getServiceToken(): string
     {
         if (!app()->bound(Octane::class) || !app(Octane::class)->isRunning()) {
             return self::getOrRefreshServiceToken();
@@ -538,6 +538,40 @@ class Keycloak
 
             if (!$response->successful()) {
                 throw new Exception('Failed to resend verification email for user ID: ' . $keycloakId);
+            }
+
+            return true;
+        } catch (Exception $e) {
+            throw new Exception($e);
+        }
+    }
+
+    public static function getFederatedIdentities(string $token, string $keycloakId): array
+    {
+        $url = config('speedi.system.keycloak_base_url').'/admin/realms/'.config('speedi.system.keycloak_realm').'/users/'.$keycloakId.'/federated-identity';
+
+        try {
+            $response = Http::withToken($token)->get($url);
+
+            if (!$response->successful()) {
+                throw new Exception('Failed to fetch federated identities for user ID: ' . $keycloakId);
+            }
+
+            return $response->json();
+        } catch (Exception $e) {
+            throw new Exception($e);
+        }
+    }
+
+    public static function removeFederatedIdentity(string $token, string $keycloakId, string $provider): bool
+    {
+        $url = config('speedi.system.keycloak_base_url').'/admin/realms/'.config('speedi.system.keycloak_realm').'/users/'.$keycloakId.'/federated-identity/'.$provider;
+
+        try {
+            $response = Http::withToken($token)->delete($url);
+
+            if (!$response->successful()) {
+                throw new Exception('Failed to unlink identity provider: ' . $provider);
             }
 
             return true;

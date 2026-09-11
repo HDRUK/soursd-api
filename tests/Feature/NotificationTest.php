@@ -86,6 +86,21 @@ class NotificationTest extends TestCase
         $this->assertEquals('Invalid argument(s)', $message);
     }
 
+    public function test_user_cannot_retrieve_notifications_they_dont_own()
+    {
+        $otherUser = User::where('id', '!=', $this->user->id)->first();
+
+        Notification::sendNow($otherUser, new AdminUserChanged($otherUser, ['test' => ['old' => 'Old', 'new' => 'New']]));
+
+        $response = $this->actingAs($this->user)
+            ->json(
+                'GET',
+                "/api/v1/users/{$otherUser->id}/notifications"
+            );
+
+        $response->assertStatus(403);
+    }
+
     public function test_user_can_retrieve_count_notifications_with_success()
     {
         Notification::sendNow($this->user, new AdminUserChanged($this->user, ['test' => ['old' => 'Old', 'new' => 'New']]));
@@ -199,6 +214,22 @@ class NotificationTest extends TestCase
         $responseMarkRead->assertStatus(400);
     }
 
+    public function test_user_cannot_mark_notifications_as_read_they_dont_own()
+    {
+        $otherUser = User::where('id', '!=', $this->user->id)->first();
+
+        Notification::sendNow($otherUser, new AdminUserChanged($otherUser, ['test' => ['old' => 'Old', 'new' => 'New']]));
+        $notificationId = $otherUser->notifications()->first()->id;
+
+        $responseMarkRead = $this->actingAs($this->user)
+            ->json(
+                'PATCH',
+                "/api/v1/users/{$otherUser->id}/notifications/" . $notificationId . "/read"
+            );
+
+        $responseMarkRead->assertStatus(403);
+    }
+
     public function test_user_can_mark_notifications_as_unread_with_success()
     {
         Notification::sendNow($this->user, new AdminUserChanged($this->user, ['test' => ['old' => 'Old', 'new' => 'New']]));
@@ -297,6 +328,22 @@ class NotificationTest extends TestCase
             );
 
         $responseMarkUnread->assertStatus(400);
+    }
+
+    public function test_user_cannot_mark_notifications_as_unread_they_dont_own()
+    {
+        $otherUser = User::where('id', '!=', $this->user->id)->first();
+
+        Notification::sendNow($otherUser, new AdminUserChanged($otherUser, ['test' => ['old' => 'Old', 'new' => 'New']]));
+        $notificationId = $otherUser->notifications()->first()->id;
+
+        $responseMarkUnread = $this->actingAs($this->user)
+            ->json(
+                'PATCH',
+                "/api/v1/users/{$otherUser->id}/notifications/" . $notificationId . "/unread"
+            );
+
+        $responseMarkUnread->assertStatus(403);
     }
 
     public function test_user_can_read_notifications()
